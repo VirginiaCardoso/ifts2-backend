@@ -31,7 +31,7 @@ PORT=3000
 
 Reemplazá `DB_USER` y `DB_PASSWORD` por las credenciales de tu instalación de MySQL. La base de datos `sistema_academico` es la que utiliza el script SQL y la configuración del backend.
 
-#### Ejecutar el script SQL
+#### Ejecutar el script SQL para crear la base de datos
 
 Desde la raíz del proyecto, ejecutá el archivo `src/database/ifts2-db.sql` con el cliente de MySQL:
 
@@ -40,6 +40,14 @@ mysql -u root -p < src/database/ifts2-db.sql
 ```
 
 Ingresá la contraseña de MySQL cuando se solicite. También podés abrir `src/database/ifts2-db.sql` desde el gestor de base de datos y ejecutar el script. Este crea la base de datos `sistema_academico` y sus tablas.
+
+#### Ejecutar el script para poblar la base de datos con datos iniciales
+
+Desde la raíz del proyecto, ejecutá el archivo `src/database/seed.sql` con el cliente de MySQL:
+
+```bash
+mysql -u root -p < src/database/seed.sql
+```
 
 ### Levantar el servidor de la Api: 
 ````
