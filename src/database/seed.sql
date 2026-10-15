@@ -4,8 +4,9 @@ USE sistema_academico;
 -- Insertar Usuarios
 -- 'password_hash' usa un texto simulado. Debe generarse con bcrypt u otro.
 INSERT INTO usuarios (id, nombre_completo, rol_institucional, nivel_de_acceso, correo, password_hash) VALUES
-(1, 'Prof. Alicia E. Ruidiaz', 'Rectora', 'Administrador General', 'aruidiaz@ifts2.edu.ar', 'hash_generado_simulado_1'),
-(2, 'María del Carmen Canovi', 'Secretaria Académica', 'Gestión Académica', 'mcanovi@ifts2.edu.ar', 'hash_generado_simulado_2');
+(1, 'Prof. Alicia E. Ruidiaz', 'Rectora', 'Administrador General', 'aruidiaz@ifts2.edu.ar', '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW'),
+(2, 'María del Carmen Canovi', 'Secretaria Académica', 'Gestión Académica', 'mcanovi@ifts2.edu.ar', '$2b$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW')
+ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash);
 
 -- Insertar Autoridades
 INSERT INTO autoridades (id, cargo, nombre_responsable) VALUES
