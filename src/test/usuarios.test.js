@@ -9,13 +9,13 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
     let idUsuarioPrueba = '';
 
     // Datos simulados para los tests
-    const credencialesAdmin = { correo: 'aruidiaz@ifts2.edu.ar', password: 'password_admin' };
-    const credencialesGestion = { correo: 'mcanovi@ifts2.edu.ar', password: 'password_gestion' };
+    const credencialesAdmin = { correo: 'aruidiaz@ifts2.edu.ar', password: '123456' };
+    const credencialesGestion = { correo: 'mcanovi@ifts2.edu.ar', password: '123456' };
 
     const nuevoUsuario = {
         nombre_completo: 'Test User',
         rol_institucional: 'Docente',
-        nivel_de_acceso: 'Administrador general',
+        nivel_de_acceso: 'Administrador General',
         correo: 'test@ifts2.edu.ar',
         password: '123'
     };
@@ -46,7 +46,7 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
     });
 
     // Test rol administrador general (debe permitir CRUD)
-    describe('CRUD de Usuarios - Rol: Administrador general', () => {
+    describe('CRUD de Usuarios - Rol: Administrador General', () => {
         it('Debe permitir crear un usuario', async () => {
             const res = await request(app)
                 .post('/api/usuarios')
@@ -88,7 +88,7 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
                 .send(nuevoUsuario);
 
             expect(res.statusCode).toEqual(403);
-            expect(res.body.error).toMatch(/Acceso prohibido/i);
+            expect(res.body.error).toMatch(/No tienes los permisos necesarios para esta acción./i);
         });
 
         it('No debe permitir editar un usuario (Error 403)', async () => {

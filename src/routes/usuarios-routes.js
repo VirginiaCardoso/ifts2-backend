@@ -13,7 +13,7 @@ const { verificarToken, verificarRol } = require('../middleware/auth-middleware'
 router.use(verificarToken);
 
 // Verificamos que sea exclusivamente rol Administrador general
-router.use(verificarRol(['Administrador general']));
+router.use(verificarRol(['Administrador General']));
 
 // Definición del CRUD
 router.get('/', obtenerUsuarios);           

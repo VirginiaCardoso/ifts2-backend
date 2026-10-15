@@ -46,8 +46,11 @@ app.get('/api/novedades', (req, res) => {
 const PORT = process.env.PORT || 3000;
 
 // Levantar el servidor
-app.listen(PORT, () => {
-    console.log(`Servidor Back-End corriendo en http://localhost:${PORT}`);
-});
+
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Servidor Back-End corriendo en http://localhost:${PORT}`);
+    });
+}
 
 module.exports = app;
