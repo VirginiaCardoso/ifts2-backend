@@ -18,7 +18,8 @@ npm install
 ### Configurar la base de datos
 
 El proyecto utiliza MySQL. Primero, asegurate de tener el servidor MySQL iniciado, por ejemplo: MYSQL Workbench (https://www.mysql.com/products/workbench/) o Heidi db (https://www.heidisql.com/).
-Crea un archivo `.env` en la raíz del proyecto con los datos de conexión:
+
+Crea un archivo .env dentro de la carpeta src basándote en el archivo .env.example, con los siguientes datos de conexión
 
 ```env
 DB_HOST=localhost
