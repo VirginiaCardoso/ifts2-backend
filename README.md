@@ -55,10 +55,3 @@ npm run dev
 ````
 npm run test
 ````
-
-#### Colección Postman
-Para utilizar la colección de Postman y realizar las pruebas, es necesario que el servidor esté corriendo en el puerto  http://localhost:3000, para esto ejecutar previamente:
-
-````
-npm run dev
-````
