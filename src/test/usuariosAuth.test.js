@@ -110,6 +110,96 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
         });
     });
 
+    //Cambio de contraseña para el usuario logueado y autenticado
+    describe('Gestión de Perfil - Cambio de Contraseña', () => {
+        let tokenPrueba;
+        let idUsuarioPrueba;
+        const credencialesPrueba = {
+            correo: 'test.password@ifts2.edu.ar',
+            password: 'passwordOriginal123'
+        };
+
+        //Crear un usuario temporal y obtener su token antes de probar
+        beforeAll(async () => {
+            const resCrear = await request(app)
+                .post('/api/usuarios')
+                .set('Authorization', `Bearer ${tokenAdmin}`)
+                .send({
+                    nombre_completo: 'Usuario Test Password',
+                    rol_institucional: 'Docente',
+                    nivel_de_acceso: 'General',
+                    correo: credencialesPrueba.correo,
+                    password: credencialesPrueba.password
+                });
+
+            idUsuarioPrueba = resCrear.body.usuarioId;
+
+            // Loguearse para obtener el token del usuario de prueba
+            const resLogin = await request(app)
+                .post('/api/auth/login')
+                .send(credencialesPrueba);
+
+            tokenPrueba = resLogin.body.token;
+        });
+
+        //Limpiar la base de datos después de las pruebas
+        afterAll(async () => {
+            await request(app)
+                .delete(`/api/usuarios/${idUsuarioPrueba}`)
+                .set('Authorization', `Bearer ${tokenAdmin}`);
+        });
+
+        it('Debe rechazar el cambio si la contraseña actual es incorrecta', async () => {
+            const res = await request(app)
+                .put('/api/auth/cambiar-password')
+                .set('Authorization', `Bearer ${tokenPrueba}`)
+                .send({
+                    password_actual: 'claveEquivocada',
+                    nueva_password: 'NuevaPassword2027'
+                });
+
+            expect(res.statusCode).toEqual(401);
+            expect(res.body.error).toMatch(/incorrecta/i);
+        });
+
+        it('Debe rechazar el cambio si la nueva contraseña tiene menos de 8 caracteres', async () => {
+            const res = await request(app)
+                .put('/api/auth/cambiar-password')
+                .set('Authorization', `Bearer ${tokenPrueba}`)
+                .send({
+                    password_actual: credencialesPrueba.password,
+                    nueva_password: '123'
+                });
+
+            expect(res.statusCode).toEqual(400);
+            expect(res.body.error).toMatch(/8 caracteres/i);
+        });
+
+        it('Debe permitir cambiar la contraseña exitosamente', async () => {
+            const res = await request(app)
+                .put('/api/auth/cambiar-password')
+                .set('Authorization', `Bearer ${tokenPrueba}`)
+                .send({
+                    password_actual: credencialesPrueba.password,
+                    nueva_password: 'NuevaPassword2027'
+                });
+
+            expect(res.statusCode).toEqual(200);
+            expect(res.body.mensaje).toMatch(/exitosa/i);
+
+            // Verificar que ahora puede iniciar sesión con la nueva contraseña
+            const resNuevoLogin = await request(app)
+                .post('/api/auth/login')
+                .send({
+                    correo: credencialesPrueba.correo,
+                    password: 'NuevaPassword2027'
+                });
+
+            expect(resNuevoLogin.statusCode).toEqual(200);
+            expect(resNuevoLogin.body).toHaveProperty('token');
+        });
+    });
+
     // Limpieza después de correr todos los tests
     afterAll(async () => {
         // Cierra el pool de conexiones de la DB para que Jest pueda terminar el proceso
