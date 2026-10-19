@@ -19,6 +19,7 @@ app.use('/api/auth', authRoutes);
 // Rutas de gestión de usuarios (Protegidas por rol Administrador general)
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/novedades', require('./routes/novedades-routes'));
+app.use('/api/profesores', require('./routes/profesores-routes'));
 
 // Ruta raíz para verificar que el servidor está vivo
 app.get('/', (req, res) => {
