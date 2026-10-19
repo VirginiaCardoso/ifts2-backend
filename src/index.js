@@ -18,29 +18,13 @@ app.use(express.json()); // Permite procesar datos en formato JSON
 app.use('/api/auth', authRoutes);
 // Rutas de gestión de usuarios (Protegidas por rol Administrador general)
 app.use('/api/usuarios', usuariosRoutes);
+app.use('/api/novedades', require('./routes/novedades-routes'));
 
 // Ruta raíz para verificar que el servidor está vivo
 app.get('/', (req, res) => {
     res.send('API del IFTS N°2 funcionando correctamente.');
 });
 
-// Ruta simulada para probar el consumo desde React (sin base de datos aún)
-app.get('/api/novedades', (req, res) => {
-    res.json([
-        { 
-            id: 1, 
-            titulo: 'Apertura de inscripciones 2027', 
-            categoria: 'Institucional',
-            fecha: '2026-10-15' 
-        },
-        { 
-            id: 2, 
-            titulo: 'Jornadas de Gastronomía', 
-            categoria: 'Eventos',
-            fecha: '2026-11-05' 
-        }
-    ]);
-});
 
 // Configuración del puerto
 const PORT = process.env.PORT || 3000;
@@ -54,3 +38,4 @@ if (require.main === module) {
 }
 
 module.exports = app;
+
