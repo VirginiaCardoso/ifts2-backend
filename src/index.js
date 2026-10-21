@@ -21,6 +21,9 @@ app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/novedades', require('./routes/novedades-routes'));
 app.use('/api/profesores', require('./routes/profesores-routes'));
 
+//Ruta de contacto (formulario de contacto)
+app.use('/api/contacto', require('./routes/contacto-routes'))
+
 // Ruta raíz para verificar que el servidor está vivo
 app.get('/', (req, res) => {
     res.send('API del IFTS N°2 funcionando correctamente.');
