@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../index'); 
+const app = require('../index');
 const pool = require('../config/db');
 const poolConection = pool.promisePool;
 
@@ -30,7 +30,7 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
             expect(res.statusCode).toEqual(200);
             expect(res.body).toHaveProperty('token');
             // Guardamos el token
-            tokenAdmin = res.body.token; 
+            tokenAdmin = res.body.token;
         });
 
         it('Debe iniciar sesión como Gestión Académica y devolver un token', async () => {
@@ -41,7 +41,7 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
             expect(res.statusCode).toEqual(200);
             expect(res.body).toHaveProperty('token');
             // Guardamos el token
-            tokenGestion = res.body.token; 
+            tokenGestion = res.body.token;
         });
     });
 
@@ -56,7 +56,7 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
             expect(res.statusCode).toEqual(201);
             expect(res.body).toHaveProperty('usuarioId');
             // Guardamos el ID creado para editarlo/eliminarlo luego
-            idUsuarioPrueba = res.body.usuarioId; 
+            idUsuarioPrueba = res.body.usuarioId;
         });
 
         it('Debe permitir editar un usuario', async () => {
@@ -94,7 +94,7 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
         it('No debe permitir editar un usuario (Error 403)', async () => {
             const res = await request(app)
                 // Intentamos editar el usuario con ID 1
-                .put('/api/usuarios/1') 
+                .put('/api/usuarios/1')
                 .set('Authorization', `Bearer ${tokenGestion}`)
                 .send({ nombre_completo: 'Intento de hackeo' });
 
@@ -197,6 +197,30 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
 
             expect(resNuevoLogin.statusCode).toEqual(200);
             expect(resNuevoLogin.body).toHaveProperty('token');
+        });
+
+        it('Debe restaurar la contraseña a su valor original para no afectar futuras pruebas', async () => {
+            const res = await request(app)
+                .put('/api/auth/cambiar-password')
+                .set('Authorization', `Bearer ${tokenPrueba}`)
+                .send({
+                    password_actual: 'NuevaPassword2027', // La contraseña que pusimos en el test anterior
+                    nueva_password: credencialesPrueba.password // El valor original ('passwordOriginal123')
+                });
+
+            expect(res.statusCode).toEqual(200);
+            expect(res.body.mensaje).toMatch(/exitosa/i);
+
+            // Verificación final de seguridad: comprobar que el login original vuelve a funcionar
+            const resLoginOriginal = await request(app)
+                .post('/api/auth/login')
+                .send({
+                    correo: credencialesPrueba.correo,
+                    password: credencialesPrueba.password
+                });
+
+            expect(resLoginOriginal.statusCode).toEqual(200);
+            expect(resLoginOriginal.body).toHaveProperty('token');
         });
     });
 
