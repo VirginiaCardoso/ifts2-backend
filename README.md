@@ -55,3 +55,46 @@ npm run dev
 ````
 npm run test
 ````
+### Pruebas del Formulario de Contacto (Envío de Correos)
+
+El sistema utiliza Nodemailer para gestionar los mensajes del formulario de contacto. Para evitar el envío de correos reales (spam) a la institución durante el desarrollo, el entorno está configurado para utilizar variables de prueba.
+
+### 1. Configuración de Credenciales (Local)
+Antes de probar el endpoint, asegúrate de configurar tu archivo `.env` (ubicado en `src/`) en modo desarrollo. Puedes usar un servicio como [Mailtrap](https://mailtrap.io/) o una cuenta de Gmail personal.
+
+```env
+# Define el entorno como desarrollo
+NODE_ENV=development
+
+# Configuración del servidor SMTP de prueba
+DEV_EMAIL_HOST=sandbox.smtp.mailtrap.io  # o smtp.gmail.com
+DEV_EMAIL_PORT=2525                      # o 465
+DEV_EMAIL_USER=tu_usuario_de_prueba
+DEV_EMAIL_PASS=tu_password_de_prueba
+DEV_EMAIL_RECEIVER=correo_donde_quieres_recibir_la_prueba@dominio.com
+```
+
+### Rutas de la API
+
+La URL base local es `http://localhost:3000` (o el valor configurado en `PORT`). Las rutas protegidas requieren enviar el token JWT en el encabezado `Authorization: Bearer <token>`.
+
+| Método | Ruta | Acceso | Descripción |
+|---|---|---|---|
+| GET | `/` | Público | Verifica que la API esté funcionando. |
+| POST | `/api/auth/login` | Público | Inicia sesión. |
+| PUT | `/api/auth/cambiar-password` | Autenticado | Cambia la contraseña del usuario autenticado. |
+| GET | `/api/usuarios` | Administrador General | Lista los usuarios. |
+| POST | `/api/usuarios` | Administrador General | Crea un usuario. |
+| PUT | `/api/usuarios/:id` | Administrador General | Actualiza un usuario. |
+| DELETE | `/api/usuarios/:id` | Administrador General | Elimina un usuario. |
+| GET | `/api/novedades` | Público | Lista las novedades. |
+| GET | `/api/novedades/:id` | Público | Obtiene una novedad. |
+| POST | `/api/novedades` | Administrador General o Gestión Académica | Crea una novedad. |
+| PUT | `/api/novedades/:id` | Administrador General o Gestión Académica | Actualiza una novedad. |
+| DELETE | `/api/novedades/:id` | Administrador General o Gestión Académica | Elimina una novedad. |
+| GET | `/api/profesores` | Público | Lista los profesores. |
+| GET | `/api/profesores/:id` | Público | Obtiene un profesor. |
+| POST | `/api/profesores` | Administrador General o Gestión Académica | Crea un profesor. |
+| PUT | `/api/profesores/:id` | Administrador General o Gestión Académica | Actualiza un profesor. |
+| DELETE | `/api/profesores/:id` | Administrador General o Gestión Académica | Elimina un profesor. |
+| POST | `/api/contacto` | Público | Envía una consulta desde el formulario de contacto. |
