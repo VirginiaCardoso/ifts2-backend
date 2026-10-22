@@ -21,8 +21,12 @@ INSERT INTO materias (id, nombre, anio_carrera, cuatrimestre, es_promocional) VA
 
 
 -- Insertar Novedades
-INSERT INTO novedades (id, titulo, descripcion_breve, etiqueta, imagen_portada_url, fecha_publicacion, usuario_id) VALUES
-(1, 'Inscripciones abiertas para el ciclo lectivo 2027', 'El período de preinscripción para la Tecnicatura Superior en Emprendimientos Gastronómicos ya está disponible. Completá el formulario en línea antes del 30 de noviembre.', 'Novedades', 'https://images.unsplash.com/photo-1577219492769-b63a779fac28?w=80&h=60&fit=crop&auto=format', CURDATE(), 1);
+INSERT INTO novedades (id, titulo, descripcion_breve, etiqueta, imagen_portada_url, fecha_publicacion, estado, usuario_id) VALUES
+(1, 'Inscripciones abiertas para el ciclo lectivo 2027', 'El período de preinscripción para la Tecnicatura Superior en Emprendimientos Gastronómicos ya está disponible. Completá el formulario en línea antes del 30 de noviembre.', 'Novedades', 'https://images.unsplash.com/photo-1577219492769-b63a779fac28?w=80&h=60&fit=crop&auto=format', CURDATE(),'Publicado', 1);
+INSERT INTO novedades (id, titulo, descripcion_breve, etiqueta, imagen_portada_url, fecha_publicacion, estado, usuario_id) VALUES (2, 'Feria  gastronómica', 'Invitación a la comunidad a la nueva feria gastronómica', 'Eventos', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOqEEyhNbVfVYi_6JCNTHh6lYSkUeR8WRdKNq3HGEUXrNKaKGczeiLLAdi&s=10', '2026-12-01', 'Borrador', 1);
+INSERT INTO novedades (id, titulo, descripcion_breve, etiqueta, imagen_portada_url, fecha_publicacion, estado, usuario_id) VALUES (3, 'Colación de grado', 'Nueva colación de grado Diciembre', 'Eventos', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcgnsJ2TZMTHpXldRyFISI9sIa_9neiKna4OnF6pNicw&s=10', CURDATE(), 'Borrador', 1);
+
+
 
 -- Vincular Profesor con Materia
 INSERT INTO profesor_materia (profesor_id, materia_id) VALUES

@@ -129,17 +129,18 @@ CREATE TABLE horarios_cursada (
     FOREIGN KEY (profesor_id) REFERENCES profesores(id) ON DELETE SET NULL
 );
 
-CREATE TABLE novedades (
+CREATE TABLE IF NOT EXISTS novedades (
     id INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(255) NOT NULL,
-    descripcion_breve TEXT,
-    etiqueta ENUM('Novedades', 'Eventos', 'Académico') NOT NULL,
-    imagen_portada_url VARCHAR(255),
-    fecha_publicacion DATE,
+    descripcion_breve TEXT NULL,
+    etiqueta ENUM('Novedades', 'Evento', 'Eventos', 'Académico') NOT NULL DEFAULT 'Novedades',
+    imagen_portada_url VARCHAR(255) NULL,
+    fecha_publicacion DATE NULL,
+    estado ENUM('Publicado', 'Borrador') NOT NULL DEFAULT 'Publicado', -- 👈 Nueva columna
     usuario_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
 );
 
 CREATE TABLE multimedia_galeria (
