@@ -20,6 +20,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/novedades', require('./routes/novedades-routes'));
 app.use('/api/profesores', require('./routes/profesores-routes'));
+app.use('/api/tramites', require('./routes/tramites-routes'));
 
 //Ruta de contacto (formulario de contacto)
 app.use('/api/contacto', require('./routes/contacto-routes'))

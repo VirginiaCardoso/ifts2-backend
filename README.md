@@ -98,3 +98,6 @@ La URL base local es `http://localhost:3000` (o el valor configurado en `PORT`).
 | PUT | `/api/profesores/:id` | Administrador General o Gestión Académica | Actualiza un profesor. |
 | DELETE | `/api/profesores/:id` | Administrador General o Gestión Académica | Elimina un profesor. |
 | POST | `/api/contacto` | Público | Envía una consulta desde el formulario de contacto. |
+### CRUD de Trámites
+
+Documentación de endpoints, validaciones y pruebas en Thunder Client: [docs/tramites.md](docs/tramites.md). Usa la tabla existente tramites_requisitos, sin migraciones SQL.

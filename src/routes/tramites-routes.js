@@ -1,0 +1,10 @@
+const router = require('express').Router();
+const { verificarToken, verificarRol } = require('../middleware/auth-middleware');
+const { obtenerTramites, guardarTramite, eliminarTramite } = require('../controllers/tramites-controller');
+router.get('/', obtenerTramites);
+router.get('/:id', obtenerTramites);
+router.use(verificarToken, verificarRol(['Administrador General', 'Gestión Académica']));
+router.post('/', guardarTramite);
+router.put('/:id', guardarTramite);
+router.delete('/:id', eliminarTramite);
+module.exports = router;
