@@ -3,7 +3,7 @@ const { promisePool } = require('../config/db');
 async function obtenerMaterias(req, res) {
     try {
         const [rows] = await promisePool.query(
-            'SELECT id, nombre, anio, cuatrimestre FROM materias ORDER BY anio ASC, cuatrimestre ASC, nombre ASC'
+            'SELECT id, nombre, anio_carrera, cuatrimestre FROM materias ORDER BY anio_carrera ASC, cuatrimestre ASC, nombre ASC'
         );
         res.json(rows);
     } catch (error) {
