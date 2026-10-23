@@ -8,8 +8,12 @@ INSERT INTO usuarios (id, nombre_completo, rol_institucional, nivel_de_acceso, c
 ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash);
 
 -- Insertar Autoridades
-INSERT INTO autoridades (id, cargo, nombre_responsable) VALUES
-(1, 'Rectora', 'Prof. Alicia E. Ruidiaz');
+INSERT INTO autoridades (cargo, nombre_responsable) VALUES
+('RECTORA', 'Prof. Alicia E. Ruidiaz'),
+('SECRETARIO ACADÉMICO', 'Lic. Leonardo Bermudez'),
+('SECRETARIA ADMINISTRATIVA', 'Prof. María Belén Orellano Camu'),
+('JEFATURA DE TRABAJOS PRÁCTICOS', 'Prof. Pedro Perez'),
+('TUTOR', 'Prof. Axel Trebino');
 
 -- Insertar Profesores
 INSERT INTO profesores (id, nombre_completo) VALUES

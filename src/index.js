@@ -11,6 +11,7 @@ const novedadesRoutes = require('./routes/novedades-routes');
 const profesoresRoutes = require('./routes/profesores-routes');
 const materiasRoutes = require('./routes/materias-routes');
 const bedelesRoutes = require('./routes/bedeles-routes');
+const autoridadesRoutes = require('./routes/autoridades-routes');
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/novedades', novedadesRoutes);
 app.use('/api/profesores', profesoresRoutes);
 app.use('/api/materias', materiasRoutes);
 app.use('/api/bedeles', bedelesRoutes);
+app.use('/api/autoridades', autoridadesRoutes);
 app.use('/api/tramites', require('./routes/tramites-routes'));
 //Ruta de contacto (formulario de contacto)
 app.use('/api/contacto', require('./routes/contacto-routes'))

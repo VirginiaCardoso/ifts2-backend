@@ -11,27 +11,20 @@ function validarNombre(body) {
     return null;
 }
 
-// Ahora admite filtro opcional ?rol=titular o ?rol=ayudante
+// filtro ?rol=titular o ?rol=ayudante
 async function obtenerProfesores(req, res) {
     const { id } = req.params;
     const { rol } = req.query;
 
     if (id && !idValido(id)) return res.status(400).json({ error: 'ID inválido.' });
+
     try {
         let sql = `
             SELECT 
                 p.id, 
                 p.nombre_completo,
-                COALESCE(
-                    JSON_ARRAYAGG(
-                        IF(m.id IS NOT NULL, 
-                            JSON_OBJECT('materia_id', m.id, 'nombre', m.nombre, 'rol', pm.rol), 
-                            NULL
-                        )
-                    ), 
-                    JSON_ARRAY()
-                ) AS materias_detalle,
-                GROUP_CONCAT(DISTINCT m.nombre SEPARATOR ' · ') AS materias_texto
+                GROUP_CONCAT(DISTINCT m.nombre ORDER BY m.nombre ASC SEPARATOR ' · ') AS materias_texto,
+                GROUP_CONCAT(DISTINCT CONCAT(m.id, ':', m.nombre, ':', COALESCE(pm.rol, 'titular')) SEPARATOR '||') AS materias_raw
             FROM profesores p
             LEFT JOIN profesor_materia pm ON p.id = pm.profesor_id
             LEFT JOIN materias m ON pm.materia_id = m.id
@@ -46,7 +39,7 @@ async function obtenerProfesores(req, res) {
             params.push(rol);
         }
 
-        sql += ' GROUP BY p.id ORDER BY p.nombre_completo ASC';
+        sql += ' GROUP BY p.id, p.nombre_completo ORDER BY p.nombre_completo ASC';
 
         const [rows] = await promisePool.query(sql, params);
 
@@ -54,18 +47,31 @@ async function obtenerProfesores(req, res) {
             return res.status(404).json({ error: 'Profesor no encontrado.' });
         }
 
-        const formatear = (row) => ({
-            ...row,
-            materias_detalle: (typeof row.materias_detalle === 'string' 
-                ? JSON.parse(row.materias_detalle) 
-                : row.materias_detalle
-            ).filter(Boolean)
-        });
+        // Formateamos las materias para el frontend
+        const formatear = (row) => {
+            const materias_detalle = row.materias_raw
+                ? row.materias_raw.split('||').map((item) => {
+                      const [materia_id, nombre, rolCatedra] = item.split(':');
+                      return {
+                          materia_id: Number(materia_id),
+                          nombre,
+                          rol: rolCatedra || 'titular'
+                      };
+                  })
+                : [];
+
+            return {
+                id: row.id,
+                nombre_completo: row.nombre_completo,
+                materias_texto: row.materias_texto || '',
+                materias_detalle
+            };
+        };
 
         res.json(id ? formatear(rows[0]) : rows.map(formatear));
     } catch (error) {
-        console.error('Error al consultar profesores:', error);
-        res.status(500).json({ error: 'No se pudieron consultar los profesores.' });
+        console.error('Error detallado al consultar profesores:', error);
+        res.status(500).json({ error: 'No se pudieron consultar los profesores.', detalle: error.message });
     }
 }
 
