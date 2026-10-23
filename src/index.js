@@ -7,6 +7,10 @@ require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 const authRoutes = require('./routes/auth-routes');
 // Rutas de gestión de usuarios
 const usuariosRoutes = require('./routes/usuarios-routes');
+const novedadesRoutes = require('./routes/novedades-routes');
+const profesoresRoutes = require('./routes/profesores-routes');
+const materiasRoutes = require('./routes/materias-routes');
+const bedelesRoutes = require('./routes/bedeles-routes');
 
 const app = express();
 
@@ -18,10 +22,11 @@ app.use(express.json()); // Permite procesar datos en formato JSON
 app.use('/api/auth', authRoutes);
 // Rutas de gestión de usuarios (Protegidas por rol Administrador general)
 app.use('/api/usuarios', usuariosRoutes);
-app.use('/api/novedades', require('./routes/novedades-routes'));
-app.use('/api/profesores', require('./routes/profesores-routes'));
+app.use('/api/novedades', novedadesRoutes);
+app.use('/api/profesores', profesoresRoutes);
+app.use('/api/materias', materiasRoutes);
+app.use('/api/bedeles', bedelesRoutes);
 app.use('/api/tramites', require('./routes/tramites-routes'));
-
 //Ruta de contacto (formulario de contacto)
 app.use('/api/contacto', require('./routes/contacto-routes'))
 

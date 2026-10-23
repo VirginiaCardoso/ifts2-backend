@@ -86,12 +86,14 @@ CREATE TABLE correlatividades (
     FOREIGN KEY (materia_requisito_id) REFERENCES materias(id) ON DELETE CASCADE
 );
 
-CREATE TABLE profesor_materia (
-    profesor_id INT NOT NULL,
-    materia_id INT NOT NULL,
-    PRIMARY KEY (profesor_id, materia_id),
-    FOREIGN KEY (profesor_id) REFERENCES profesores(id) ON DELETE CASCADE,
-    FOREIGN KEY (materia_id) REFERENCES materias(id) ON DELETE CASCADE
+CREATE TABLE `profesor_materia` (
+	`profesor_id` INT(11) NOT NULL,
+	`materia_id` INT(11) NOT NULL,
+	`rol` ENUM('titular','ayudante') NOT NULL DEFAULT 'titular' COLLATE 'utf8mb4_general_ci',
+	PRIMARY KEY (`profesor_id`, `materia_id`) USING BTREE,
+	INDEX `materia_id` (`materia_id`) USING BTREE,
+	CONSTRAINT `profesor_materia_ibfk_1` FOREIGN KEY (`profesor_id`) REFERENCES `profesores` (`id`) ON UPDATE RESTRICT ON DELETE CASCADE,
+	CONSTRAINT `profesor_materia_ibfk_2` FOREIGN KEY (`materia_id`) REFERENCES `materias` (`id`) ON UPDATE RESTRICT ON DELETE CASCADE
 );
 
 CREATE TABLE mesas_examenes (
@@ -164,4 +166,12 @@ CREATE TABLE documentos (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS bedeles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    anio_asignado ENUM('Primer Año', 'Segundo Año', 'Tercer Año') NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

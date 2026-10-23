@@ -14,6 +14,8 @@ INSERT INTO autoridades (id, cargo, nombre_responsable) VALUES
 -- Insertar Profesores
 INSERT INTO profesores (id, nombre_completo) VALUES
 (1, 'Prof. Miguel Colloca');
+INSERT INTO `profesores` (`id`, `nombre_completo`, `created_at`, `updated_at`) VALUES (2, 'Prof. Gladis Casalegno', '2026-10-22 18:45:13', '2026-10-22 18:45:13');
+
 
 -- Insertar Materias
 INSERT INTO materias (id, nombre, anio_carrera, cuatrimestre, es_promocional) VALUES
@@ -29,8 +31,9 @@ INSERT INTO novedades (id, titulo, descripcion_breve, etiqueta, imagen_portada_u
 
 
 -- Vincular Profesor con Materia
-INSERT INTO profesor_materia (profesor_id, materia_id) VALUES
-(1, 1);
+INSERT INTO `profesor_materia` (`profesor_id`, `materia_id`, `rol`) VALUES (1, 1, 'titular');
+INSERT INTO `profesor_materia` (`profesor_id`, `materia_id`, `rol`) VALUES (2, 1, 'ayudante');
+
 
 -- Insertar Mesas de Exámenes (Dos fechas distintas para la misma materia)
 INSERT INTO mesas_examenes (id, materia_id, periodo, fecha, hora, anio_vigencia) VALUES
@@ -45,3 +48,8 @@ INSERT INTO mesa_examen_profesor (mesa_examen_id, profesor_id) VALUES
 -- Insertar Horarios de Cursada
 INSERT INTO horarios_cursada (dia_semana, hora_inicio, hora_fin, cuatrimestre, anio, materia_id, profesor_id) VALUES
 ('Lunes', '18:00:00', '20:00:00', 1, 2027, 1, 1);
+
+INSERT INTO bedeles (nombre, anio_asignado) VALUES 
+('Sra. Andrea Barrios', 'Primer Año'),
+('Sra. Verónica Alarcón', 'Segundo Año'),
+('Sr. Esteban Suárez', 'Tercer Año');
