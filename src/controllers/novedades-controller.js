@@ -43,7 +43,7 @@ async function obtenerNovedades(req, res) {
         if (req.params.id) {
             sql += ' WHERE id = ?';
             params.push(req.params.id);
-        } else if (!req.query.admin) { 
+        } else if (!req.query.admin) {
             // 👈 Si no viene el parámetro ?admin=true, aplicamos el filtro público:
             sql += ' WHERE estado = "Publicado" AND (fecha_publicacion <= CURDATE() OR fecha_publicacion IS NULL) ORDER BY fecha_publicacion DESC, id DESC';
         } else {

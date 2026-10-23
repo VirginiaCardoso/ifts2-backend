@@ -138,7 +138,7 @@ CREATE TABLE IF NOT EXISTS novedades (
     etiqueta ENUM('Novedades', 'Evento', 'Eventos', 'Académico') NOT NULL DEFAULT 'Novedades',
     imagen_portada_url VARCHAR(255) NULL,
     fecha_publicacion DATE NULL,
-    estado ENUM('Publicado', 'Borrador') NOT NULL DEFAULT 'Publicado', -- 👈 Nueva columna
+    estado ENUM('Publicado', 'Borrador') NOT NULL DEFAULT 'Publicado',
     usuario_id INT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
