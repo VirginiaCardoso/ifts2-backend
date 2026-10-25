@@ -106,4 +106,36 @@ const eliminarUsuario = async (req, res) => {
     }
 };
 
-module.exports = { obtenerUsuarios, crearUsuario, actualizarUsuario, eliminarUsuario };
+const cambiarPasswordUsuario = async (req, res) => {
+    const { id } = req.params;
+    const { password } = req.body;
+
+    try {
+        if (!password || password.length < 8) {
+            return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres.' });
+        }
+
+        // Verificar si el usuario existe
+        const [user] = await poolConection.query('SELECT id FROM usuarios WHERE id = ?', [id]);
+        if (user.length === 0) {
+            return res.status(404).json({ error: 'Usuario no encontrado.' });
+        }
+
+        // Encriptar la nueva contraseña
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(password, salt);
+
+        // Actualizar la contraseña en la base de datos
+        await poolConection.query(
+            'UPDATE usuarios SET password_hash = ? WHERE id = ?',
+            [password_hash, id]
+        );
+
+        res.json({ mensaje: 'Contraseña restablecida exitosamente' });
+    } catch (error) {
+        console.error('Error al restablecer contraseña:', error);
+        res.status(500).json({ error: 'Error interno del servidor al restablecer la contraseña' });
+    }
+};
+
+module.exports = { obtenerUsuarios, crearUsuario, actualizarUsuario, eliminarUsuario, cambiarPasswordUsuario };
