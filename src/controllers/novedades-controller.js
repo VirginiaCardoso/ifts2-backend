@@ -79,9 +79,9 @@ async function guardarNovedad(req, res) {
             if (!result.affectedRows) return res.status(404).json({ error: 'Novedad no encontrada.' });
             novedadId = Number(id);
         } else {
-            const usuarioId = req.usuario?.id || req.user?.id || 1;
+            const usuarioId = req.usuario.id;
 
-            const [result] = await promisePool.query('INSERT INTO novedades (titulo, descripcion_breve, etiqueta, imagen_portada_url, fecha_publicacion, estado, usuario_id) VALUES (?, ?, ?, ?, ?, ?, ?', [...valores, req.usuarioId]);
+            const [result] = await promisePool.query('INSERT INTO novedades (titulo, descripcion_breve, etiqueta, imagen_portada_url, fecha_publicacion, estado, usuario_id) VALUES (?, ?, ?, ?, ?, ?, ?)', [...valores, usuarioId]);
             novedadId = result.insertId;
         }
         res.status(id ? 200 : 201).json({ mensaje: id ? 'Novedad actualizada.' : 'Novedad creada.', novedadId });
