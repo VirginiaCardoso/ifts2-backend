@@ -101,3 +101,7 @@ La URL base local es `http://localhost:3000` (o el valor configurado en `PORT`).
 ### CRUD de Trámites
 
 Documentación de endpoints, validaciones y pruebas en Thunder Client: [docs/tramites.md](docs/tramites.md). Usa la tabla existente tramites_requisitos, sin migraciones SQL.
+
+### Gestión Académica: horarios y exámenes
+
+Contrato de API, formatos para la pantalla y pruebas en Thunder Client: [docs/gestion-academica.md](docs/gestion-academica.md). Reutiliza el esquema existente, sin migraciones SQL.

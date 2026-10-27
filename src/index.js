@@ -30,6 +30,9 @@ app.use('/api/materias', materiasRoutes);
 app.use('/api/bedeles', bedelesRoutes);
 app.use('/api/autoridades', autoridadesRoutes);
 app.use('/api/tramites', require('./routes/tramites-routes'));
+const { mesasRoutes, horariosRoutes } = require('./routes/gestion-academica-routes');
+app.use('/api/mesas-examenes', mesasRoutes);
+app.use('/api/horarios-cursada', horariosRoutes);
 //Ruta de contacto (formulario de contacto)
 app.use('/api/contacto', require('./routes/contacto-routes'))
 
