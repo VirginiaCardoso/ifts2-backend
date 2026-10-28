@@ -57,3 +57,12 @@ INSERT INTO bedeles (nombre, anio_asignado) VALUES
 ('Sra. Andrea Barrios', 'Primer Año'),
 ('Sra. Verónica Alarcón', 'Segundo Año'),
 ('Sr. Esteban Suárez', 'Tercer Año');
+
+-- Insertar Trámites y Requisitos iniciales
+INSERT INTO tramites_requisitos (nombre_tramite, descripcion_requisitos) VALUES
+('Certificado de alumno regular', 'Completar el formulario en Bedelía. Presentar DNI. El certificado se entrega dentro de las 48 hs hábiles.'),
+('Analítico parcial', 'Solicitar en Bedelía con al menos 5 días hábiles de anticipación. Presentar DNI y constancia de materias cursadas.'),
+('Boleto Estudiantil (SUBE)', 'Completar el formulario online en la web de SUBE. Presentar en Bedelía: DNI, constancia de alumno regular y 1 foto carné.'),
+('Certificado de asistencia a examen', 'Solicitarlo en Bedelía el mismo día del examen o hasta 2 días hábiles después. Presentar DNI.'),
+('Libre deuda', 'Solicitar en Secretaría Administrativa. Plazo de entrega: 5 días hábiles. Requisito previo: no tener material ni equipamiento a cargo.'),
+('Equivalencias de materias', 'Presentar nota de solicitud dirigida a Rectoría, programa analítico de la/s materia/s a homologar y certificado de estudios previos.');
