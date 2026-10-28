@@ -66,3 +66,9 @@ INSERT INTO tramites_requisitos (nombre_tramite, descripcion_requisitos) VALUES
 ('Certificado de asistencia a examen', 'Solicitarlo en Bedelía el mismo día del examen o hasta 2 días hábiles después. Presentar DNI.'),
 ('Libre deuda', 'Solicitar en Secretaría Administrativa. Plazo de entrega: 5 días hábiles. Requisito previo: no tener material ni equipamiento a cargo.'),
 ('Equivalencias de materias', 'Presentar nota de solicitud dirigida a Rectoría, programa analítico de la/s materia/s a homologar y certificado de estudios previos.');
+
+INSERT INTO enlaces_externos (nombre_sistema, url_destino) VALUES
+('SIU Guaraní', 'https://guarani.ifts2.edu.ar'),
+('Moodle / Aulas Virtuales', 'https://aulas.ifts2.edu.ar'),
+('Becas PROGRESAR', 'https://www.argentina.gob.ar/educacion/progresar'),
+('Mi Argentina', 'https://www.miargentina.gob.ar');
