@@ -175,3 +175,21 @@ CREATE TABLE IF NOT EXISTS bedeles (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS ingresantes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    dni VARCHAR(20) NOT NULL UNIQUE,
+    correo VARCHAR(255) NOT NULL,
+    telefono VARCHAR(30),
+    fecha_inscripcion DATE NOT NULL,
+    estado ENUM(
+        'Pendiente',
+        'En revisión',
+        'Confirmada'
+    ) NOT NULL DEFAULT 'Pendiente',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
+);
