@@ -2,25 +2,25 @@
 const router = require('express').Router();
 
 const {
-    verificarToken,
-    verificarRol
+  verificarToken,
+  verificarRol,
 } = require('../middleware/auth-middleware');
 
 const {
-    obtenerIngresantes,
-    crearIngresante,
-    actualizarIngresante,
-    eliminarIngresante
+  obtenerIngresantes,
+  crearIngresante,
+  actualizarIngresante,
+  eliminarIngresante,
 } = require('../controllers/ingresantes-controller');
 
-// Consultas
+// Consultar etapas
 router.get('/', obtenerIngresantes);
 router.get('/:id', obtenerIngresantes);
 
-// Operaciones de escritura protegidas por autenticación y rol
+// Proteger las operaciones de escritura
 router.use(
-    verificarToken,
-    verificarRol(['Administrador General', 'Gestión Académica'])
+  verificarToken,
+  verificarRol(['Administrador General', 'Gestión Académica'])
 );
 
 router.post('/', crearIngresante);

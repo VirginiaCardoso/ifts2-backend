@@ -1,301 +1,281 @@
 
 const { promisePool } = require('../config/db');
 
-// GET /api/ingresantes
-// GET /api/ingresantes/:id
 const obtenerIngresantes = async (req, res) => {
-    try {
-        const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-        if (id !== undefined) {
-            if (!/^\d+$/.test(id) || Number(id) < 1) {
-                return res.status(400).json({
-                    mensaje: 'El ID del ingresante no es válido.'
-                });
-            }
-
-            const [filas] = await promisePool.execute(
-                'SELECT * FROM ingresantes WHERE id = ?',
-                [id]
-            );
-
-            if (filas.length === 0) {
-                return res.status(404).json({
-                    mensaje: 'No se encontró el ingresante.'
-                });
-            }
-
-            return res.json(filas[0]);
-        }
-
-        const [filas] = await promisePool.execute(
-            'SELECT * FROM ingresantes ORDER BY fecha_inscripcion DESC, id DESC'
-        );
-
-        return res.json(filas);
-    } catch (error) {
-        console.error('Error al obtener ingresantes:', error);
-
-        return res.status(500).json({
-            mensaje: 'Error al consultar los ingresantes.'
+    if (id !== undefined) {
+      if (!/^\d+$/.test(id) || Number(id) < 1) {
+        return res.status(400).json({
+          mensaje: 'El ID de la etapa no es válido.',
         });
+      }
+
+      const [filas] = await promisePool.execute(
+        'SELECT * FROM etapas_ingreso WHERE id_etapa = ?',
+        [id]
+      );
+
+      if (filas.length === 0) {
+        return res.status(404).json({
+          mensaje: 'No se encontró la etapa de ingreso.',
+        });
+      }
+
+      return res.json(filas[0]);
     }
+
+    const [filas] = await promisePool.execute(
+      `SELECT * FROM etapas_ingreso
+       ORDER BY anio DESC, orden ASC, fecha_inicio ASC`
+    );
+
+    return res.json(filas);
+  } catch (error) {
+    console.error('Error al obtener etapas de ingreso:', error);
+
+    return res.status(500).json({
+      mensaje: 'Error al consultar las etapas de ingreso.',
+    });
+  }
 };
 
-// POST /api/ingresantes
+const validarEtapa = (datos) => {
+  const {
+    anio,
+    nombre,
+    fecha_inicio,
+    fecha_fin,
+  } = datos;
+
+  if (
+    anio === undefined ||
+    !Number.isInteger(Number(anio)) ||
+    Number(anio) < 2000 ||
+    Number(anio) > 2100
+  ) {
+    return 'Ingresá un año válido entre 2000 y 2100.';
+  }
+
+  if (!nombre || !nombre.trim()) {
+    return 'El nombre de la etapa es obligatorio.';
+  }
+
+  if (!fecha_inicio || !fecha_fin) {
+    return 'Las fechas de inicio y finalización son obligatorias.';
+  }
+
+  const validarFecha = (valor) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+      return false;
+    }
+
+    const fecha = new Date(`${valor}T00:00:00Z`);
+
+    return (
+      !Number.isNaN(fecha.getTime()) &&
+      fecha.toISOString().slice(0, 10) === valor
+    );
+  };
+
+  if (!validarFecha(fecha_inicio) || !validarFecha(fecha_fin)) {
+    return 'Ingresá fechas válidas en formato AAAA-MM-DD.';
+  }
+
+  if (fecha_fin < fecha_inicio) {
+    return 'La fecha de finalización no puede ser anterior a la de inicio.';
+  }
+
+  if (
+    datos.orden !== undefined &&
+    datos.orden !== null &&
+    datos.orden !== '' &&
+    (!Number.isInteger(Number(datos.orden)) || Number(datos.orden) < 0)
+  ) {
+    return 'El orden debe ser un número entero igual o mayor que cero.';
+  }
+
+  if (
+    datos.activo !== undefined &&
+    ![true, false, 1, 0, '1', '0'].includes(datos.activo)
+  ) {
+    return 'El estado de actividad no es válido.';
+  }
+
+  return null;
+};
+
 const crearIngresante = async (req, res) => {
-    try {
-        const {
-            nombre,
-            apellido,
-            dni,
-            correo,
-            telefono,
-            fecha_inscripcion,
-            estado
-        } = req.body;
+  try {
+    const {
+      anio,
+      nombre,
+      descripcion,
+      fecha_inicio,
+      fecha_fin,
+      requisitos,
+      orden,
+      activo,
+    } = req.body;
 
-        if (
-            !nombre?.trim() ||
-            !apellido?.trim() ||
-            !dni?.trim() ||
-            !correo?.trim() ||
-            !fecha_inscripcion
-        ) {
-            return res.status(400).json({
-                mensaje: 'Completá nombre, apellido, DNI, correo y fecha de inscripción.'
-            });
-        }
+    const errorValidacion = validarEtapa(req.body);
 
-        const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim());
-
-        if (!emailValido) {
-            return res.status(400).json({
-                mensaje: 'El correo electrónico no tiene un formato válido.'
-            });
-        }
-
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha_inscripcion)) {
-            return res.status(400).json({
-                mensaje: 'La fecha debe tener el formato AAAA-MM-DD.'
-            });
-        }
-
-        const fecha = new Date(`${fecha_inscripcion}T00:00:00Z`);
-
-        if (
-            Number.isNaN(fecha.getTime()) ||
-            fecha.toISOString().slice(0, 10) !== fecha_inscripcion
-        ) {
-            return res.status(400).json({
-                mensaje: 'La fecha de inscripción no es válida.'
-            });
-        }
-
-        const estadosValidos = [
-            'Pendiente',
-            'En revisión',
-            'Confirmada'
-        ];
-
-        const estadoFinal = estado || 'Pendiente';
-
-        if (!estadosValidos.includes(estadoFinal)) {
-            return res.status(400).json({
-                mensaje: 'El estado seleccionado no es válido.'
-            });
-        }
-
-        const [resultado] = await promisePool.execute(
-            `INSERT INTO ingresantes
-                (nombre, apellido, dni, correo, telefono, fecha_inscripcion, estado)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [
-                nombre.trim(),
-                apellido.trim(),
-                dni.trim(),
-                correo.trim(),
-                telefono?.trim() || null,
-                fecha_inscripcion,
-                estadoFinal
-            ]
-        );
-
-        const [filas] = await promisePool.execute(
-            'SELECT * FROM ingresantes WHERE id = ?',
-            [resultado.insertId]
-        );
-
-        return res.status(201).json({
-            mensaje: 'Ingresante registrado correctamente.',
-            ingresante: filas[0]
-        });
-    } catch (error) {
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({
-                mensaje: 'Ya existe un ingresante registrado con ese DNI.'
-            });
-        }
-
-        console.error('Error al crear ingresante:', error);
-
-        return res.status(500).json({
-            mensaje: 'Error al registrar el ingresante.'
-        });
+    if (errorValidacion) {
+      return res.status(400).json({ mensaje: errorValidacion });
     }
+
+    const [resultado] = await promisePool.execute(
+      `INSERT INTO etapas_ingreso
+        (anio, nombre, descripcion, fecha_inicio, fecha_fin,
+         requisitos, orden, activo)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        Number(anio),
+        nombre.trim(),
+        descripcion?.trim() || null,
+        fecha_inicio,
+        fecha_fin,
+        requisitos?.trim() || null,
+        orden === '' || orden === undefined || orden === null
+          ? null
+          : Number(orden),
+        activo === undefined ? 1 : Number(Boolean(
+          activo === true || activo === 1 ||
+          activo === '1' || activo === 'true'
+        )),
+      ]
+    );
+
+    const [filas] = await promisePool.execute(
+      'SELECT * FROM etapas_ingreso WHERE id_etapa = ?',
+      [resultado.insertId]
+    );
+
+    return res.status(201).json({
+      mensaje: 'Etapa de ingreso creada correctamente.',
+      etapa: filas[0],
+    });
+  } catch (error) {
+    console.error('Error al crear etapa de ingreso:', error);
+
+    return res.status(500).json({
+      mensaje: 'Error al crear la etapa de ingreso.',
+    });
+  }
 };
 
-// PUT /api/ingresantes/:id
 const actualizarIngresante = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const {
-            nombre,
-            apellido,
-            dni,
-            correo,
-            telefono,
-            fecha_inscripcion,
-            estado
-        } = req.body;
+  try {
+    const { id } = req.params;
 
-        if (!/^\d+$/.test(id) || Number(id) < 1) {
-            return res.status(400).json({
-                mensaje: 'El ID del ingresante no es válido.'
-            });
-        }
-
-        if (
-            !nombre?.trim() ||
-            !apellido?.trim() ||
-            !dni?.trim() ||
-            !correo?.trim() ||
-            !fecha_inscripcion
-        ) {
-            return res.status(400).json({
-                mensaje: 'Completá nombre, apellido, DNI, correo y fecha de inscripción.'
-            });
-        }
-
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim())) {
-            return res.status(400).json({
-                mensaje: 'El correo electrónico no tiene un formato válido.'
-            });
-        }
-
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha_inscripcion)) {
-            return res.status(400).json({
-                mensaje: 'La fecha debe tener el formato AAAA-MM-DD.'
-            });
-        }
-
-        const fecha = new Date(`${fecha_inscripcion}T00:00:00Z`);
-
-        if (
-            Number.isNaN(fecha.getTime()) ||
-            fecha.toISOString().slice(0, 10) !== fecha_inscripcion
-        ) {
-            return res.status(400).json({
-                mensaje: 'La fecha de inscripción no es válida.'
-            });
-        }
-
-        const estadosValidos = [
-            'Pendiente',
-            'En revisión',
-            'Confirmada'
-        ];
-
-        if (!estadosValidos.includes(estado)) {
-            return res.status(400).json({
-                mensaje: 'El estado seleccionado no es válido.'
-            });
-        }
-
-        const [resultado] = await promisePool.execute(
-            `UPDATE ingresantes
-             SET nombre = ?, apellido = ?, dni = ?, correo = ?,
-                 telefono = ?, fecha_inscripcion = ?, estado = ?
-             WHERE id = ?`,
-            [
-                nombre.trim(),
-                apellido.trim(),
-                dni.trim(),
-                correo.trim(),
-                telefono?.trim() || null,
-                fecha_inscripcion,
-                estado,
-                id
-            ]
-        );
-
-        if (resultado.affectedRows === 0) {
-            return res.status(404).json({
-                mensaje: 'No se encontró el ingresante.'
-            });
-        }
-
-        const [filas] = await promisePool.execute(
-            'SELECT * FROM ingresantes WHERE id = ?',
-            [id]
-        );
-
-        return res.json({
-            mensaje: 'Ingresante actualizado correctamente.',
-            ingresante: filas[0]
-        });
-    } catch (error) {
-        if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(409).json({
-                mensaje: 'Ya existe otro ingresante registrado con ese DNI.'
-            });
-        }
-
-        console.error('Error al actualizar ingresante:', error);
-
-        return res.status(500).json({
-            mensaje: 'Error al actualizar el ingresante.'
-        });
+    if (!/^\d+$/.test(id) || Number(id) < 1) {
+      return res.status(400).json({
+        mensaje: 'El ID de la etapa no es válido.',
+      });
     }
+
+    const errorValidacion = validarEtapa(req.body);
+
+    if (errorValidacion) {
+      return res.status(400).json({ mensaje: errorValidacion });
+    }
+
+    const {
+      anio,
+      nombre,
+      descripcion,
+      fecha_inicio,
+      fecha_fin,
+      requisitos,
+      orden,
+      activo,
+    } = req.body;
+
+    const [resultado] = await promisePool.execute(
+      `UPDATE etapas_ingreso
+       SET anio = ?, nombre = ?, descripcion = ?,
+           fecha_inicio = ?, fecha_fin = ?, requisitos = ?,
+           orden = ?, activo = ?
+       WHERE id_etapa = ?`,
+      [
+        Number(anio),
+        nombre.trim(),
+        descripcion?.trim() || null,
+        fecha_inicio,
+        fecha_fin,
+        requisitos?.trim() || null,
+        orden === '' || orden === undefined || orden === null
+          ? null
+          : Number(orden),
+        activo === undefined ? 1 : Number(
+          activo === true || activo === 1 ||
+          activo === '1' || activo === 'true'
+        ),
+        id,
+      ]
+    );
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        mensaje: 'No se encontró la etapa de ingreso.',
+      });
+    }
+
+    const [filas] = await promisePool.execute(
+      'SELECT * FROM etapas_ingreso WHERE id_etapa = ?',
+      [id]
+    );
+
+    return res.json({
+      mensaje: 'Etapa de ingreso actualizada correctamente.',
+      etapa: filas[0],
+    });
+  } catch (error) {
+    console.error('Error al actualizar etapa de ingreso:', error);
+
+    return res.status(500).json({
+      mensaje: 'Error al actualizar la etapa de ingreso.',
+    });
+  }
 };
 
-// DELETE /api/ingresantes/:id
 const eliminarIngresante = async (req, res) => {
-    try {
-        const { id } = req.params;
+  try {
+    const { id } = req.params;
 
-        if (!/^\d+$/.test(id) || Number(id) < 1) {
-            return res.status(400).json({
-                mensaje: 'El ID del ingresante no es válido.'
-            });
-        }
-
-        const [resultado] = await promisePool.execute(
-            'DELETE FROM ingresantes WHERE id = ?',
-            [id]
-        );
-
-        if (resultado.affectedRows === 0) {
-            return res.status(404).json({
-                mensaje: 'No se encontró el ingresante.'
-            });
-        }
-
-        return res.json({
-            mensaje: 'Ingresante eliminado correctamente.'
-        });
-    } catch (error) {
-        console.error('Error al eliminar ingresante:', error);
-
-        return res.status(500).json({
-            mensaje: 'Error al eliminar el ingresante.'
-        });
+    if (!/^\d+$/.test(id) || Number(id) < 1) {
+      return res.status(400).json({
+        mensaje: 'El ID de la etapa no es válido.',
+      });
     }
+
+    const [resultado] = await promisePool.execute(
+      'DELETE FROM etapas_ingreso WHERE id_etapa = ?',
+      [id]
+    );
+
+    if (resultado.affectedRows === 0) {
+      return res.status(404).json({
+        mensaje: 'No se encontró la etapa de ingreso.',
+      });
+    }
+
+    return res.json({
+      mensaje: 'Etapa de ingreso eliminada correctamente.',
+    });
+  } catch (error) {
+    console.error('Error al eliminar etapa de ingreso:', error);
+
+    return res.status(500).json({
+      mensaje: 'Error al eliminar la etapa de ingreso.',
+    });
+  }
 };
 
 module.exports = {
-    obtenerIngresantes,
-    crearIngresante,
-    actualizarIngresante,
-    eliminarIngresante
+  obtenerIngresantes,
+  crearIngresante,
+  actualizarIngresante,
+  eliminarIngresante,
 };
