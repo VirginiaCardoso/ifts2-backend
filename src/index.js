@@ -14,6 +14,8 @@ const materiasRoutes = require('./routes/materias-routes');
 const bedelesRoutes = require('./routes/bedeles-routes');
 const autoridadesRoutes = require('./routes/autoridades-routes');
 const ingresantesRoutes = require('./routes/ingresantes-routes');
+const enlacesExternos = require('./routes/enlacesRoutes')
+
 
 const app = express();
 
@@ -35,6 +37,8 @@ app.use('/api/tramites', require('./routes/tramites-routes'));
 const { mesasRoutes, horariosRoutes } = require('./routes/gestion-academica-routes');
 app.use('/api/mesas-examenes', mesasRoutes);
 app.use('/api/horarios-cursada', horariosRoutes);
+app.use('/api/enlaces-externos', enlacesExternos)
+
 //Ruta de contacto (formulario de contacto)
 app.use('/api/contacto', require('./routes/contacto-routes'))
 
