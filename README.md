@@ -104,4 +104,12 @@ Documentación de endpoints, validaciones y pruebas en Thunder Client: [docs/tra
 
 ### Gestión Académica: horarios y exámenes
 
-Contrato de API, formatos para la pantalla y pruebas en Thunder Client: [docs/gestion-academica.md](docs/gestion-academica.md). Reutiliza el esquema existente, sin migraciones SQL.
+Contrato de API, formatos para la pantalla y pruebas en Thunder Client: [docs/gestion-academica.md](docs/gestion-academica.md). La carga complementaria de materias y promocionales agrega soporte anual en bases anteriores; ver la guía antes de ejecutar seeds.
+
+### Carrera y Plan de Estudios
+
+CRUD de materias, asignación de docentes, promocionables, correlatividades, aviso y PDF oficiales: [docs/carrera.md](docs/carrera.md). La carga complementaria de materias y promocionales agrega soporte anual en bases anteriores; ver la guía antes de ejecutar seeds.
+
+Carga complementaria (no usar el seed general sobre una base ya cargada): `npm.cmd run seed:carrera` previsualiza y `npm.cmd run seed:carrera -- --apply` aplica las materias y promocionales proporcionados.
+
+Correlatividades: después del plan, `npm.cmd run seed:correlatividades` previsualiza y `npm.cmd run seed:correlatividades -- --apply` carga las reglas simplificadas de dos categorías sin duplicarlas.
