@@ -28,7 +28,7 @@ const obtenerIngresantes = async (req, res) => {
 
     const [filas] = await promisePool.execute(
       `SELECT * FROM etapas_ingreso
-       ORDER BY anio DESC, orden ASC, fecha_inicio ASC`
+       ORDER BY id_etapa ASC`
     );
 
     return res.json(filas);
