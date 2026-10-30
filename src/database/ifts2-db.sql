@@ -19,6 +19,7 @@ CREATE TABLE materias (
     nombre VARCHAR(255) NOT NULL,
     anio_carrera ENUM('1', '2', '3') NOT NULL,
     cuatrimestre INT,
+    es_anual BOOLEAN NOT NULL DEFAULT FALSE,
     es_promocional BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

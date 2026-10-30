@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --detectOpenHandles",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "seed:carrera": "node src/database/seed-carrera.js",
+    "seed:correlatividades": "node src/database/seed-correlatividades.js"
   },
   "repository": {
     "type": "git",

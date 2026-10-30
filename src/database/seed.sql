@@ -72,3 +72,6 @@ INSERT INTO enlaces_externos (nombre_sistema, url_destino) VALUES
 ('Moodle / Aulas Virtuales', 'https://aulas.ifts2.edu.ar'),
 ('Becas PROGRESAR', 'https://www.argentina.gob.ar/educacion/progresar'),
 ('Mi Argentina', 'https://www.miargentina.gob.ar');
+
+-- Plan completo y promocionales: después de instalar esta base, ejecutar npm run seed:carrera -- --apply.
+-- No repetir este seed general sobre bases ya cargadas.

@@ -30,6 +30,7 @@ app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/novedades', novedadesRoutes);
 app.use('/api/profesores', profesoresRoutes);
 app.use('/api/materias', materiasRoutes);
+app.use('/api/carrera', require('./routes/carrera-routes'));
 app.use('/api/bedeles', bedelesRoutes);
 app.use('/api/autoridades', autoridadesRoutes);
 app.use('/api/ingresantes', ingresantesRoutes);
