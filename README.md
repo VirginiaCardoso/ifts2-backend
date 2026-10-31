@@ -81,6 +81,8 @@ npm test -- --runInBand src/test/contacto.test.js
 
 En PowerShell de Windows también podés usar `npm.cmd` en lugar de `npm`. Para las suites que acceden a MySQL, iniciá el servidor de base de datos, configurá `src/.env` y prepará `sistema_academico` con los dos scripts de la sección anterior. Ejecutá estas pruebas solo contra una base local de desarrollo: las suites de integración crean, modifican y eliminan registros temporales y algunas usan las cuentas iniciales. Los logins de prueba pueden actualizar su último acceso. La suite de Carrera crea una base de datos temporal aislada y necesita permisos de creación y eliminación de bases. No ejecutes la suite sobre producción.
 
+Las suites que prueban login o rutas protegidas necesitan que existan las cuentas `aruidiaz@ifts2.edu.ar` (Administrador General) y `mcanovi@ifts2.edu.ar` (Gestión Académica), y que su contraseña coincida con la configurada para la prueba (`123456` en la instalación inicial). Si un login devuelve `401`, comprobá que ambas cuentas existan y que sus contraseñas no hayan sido cambiadas; no continúes con una base de datos de producción.
+
 La suite de Contacto simula Nodemailer: no envía correos reales ni necesita conectarse a un SMTP. La suite unitaria de Ingresantes usa una base de datos simulada.
 
 | Suite | Qué se probó | Resultado esperado | Resultado obtenido en la última ejecución |
@@ -88,14 +90,15 @@ La suite de Contacto simula Nodemailer: no envía correos reales ni necesita con
 | `usuariosAuth.test.js` | Login de ambos roles; CRUD de usuarios; autorización por rol; cambio de contraseña y validaciones. | Tokens para credenciales válidas, operaciones permitidas para Administrador General y rechazo de operaciones/contraseñas inválidas. | Aprobada. |
 | `tramites.test.js` | CRUD, persistencia, campos e IDs inválidos, descripción opcional y protección de escrituras. | Respuestas correctas para operaciones válidas y rechazo de datos inválidos o accesos no autorizados. | Aprobada. |
 | `profesores.test.js` | CRUD, consultas públicas, permisos, validaciones y efecto de claves foráneas al eliminar. | Persistencia de los cambios; errores apropiados para datos inválidos o permisos insuficientes; conservación de registros relacionados según el esquema. | Aprobada. |
-| `novedades.test.js` | Lectura, escritura autorizada, validaciones y uso del autor asociado al token. | CRUD válido y rechazo de accesos no autorizados o datos inválidos. | Aprobada. |
+| `novedades.test.js` | Lectura pública, escritura exclusiva de Administrador General y validaciones. | GET público; escrituras rechazadas para Gestión Académica y datos inválidos. | Aprobada. |
 | `gestionAcademica.test.js` | CRUD y filtros de mesas y horarios, reglas de fechas/horas/referencias, permisos y transacciones. | Datos persistidos y filtrados correctamente; validaciones aplicadas y cambios revertidos ante fallos transaccionales. | Aprobada. |
 | `carrera.test.js` | Materias, docentes asignados, reglas de correlatividad, aviso, PDFs, materias anuales y seeds complementarios. | Operaciones válidas persistidas; restricciones, permisos y reversión ante fallos respetados; seeds repetibles sin duplicaciones. | Aprobada. |
 | `contacto.test.js` | Campos obligatorios, asuntos permitidos y envío simulado mediante Nodemailer. | Datos incompletos o asunto inválido rechazados sin enviar; consulta válida procesada y correo simulado. | Aprobada. |
 | `ingresantes-controller.test.js` | Creación y actualización de etapas de ingreso con fechas opcionales o parciales y fechas inválidas. | Fechas omitidas guardadas como `NULL`; fechas inválidas rechazadas sin ejecutar consultas. | Aprobada. |
 | `rutasAdminPublicas.test.js` | Acceso público de GET y control por rol en escrituras de autoridades, bedeles y enlaces externos. | GET accesibles sin token; escrituras solo para Administrador General. | Aprobada. |
+| `usuarios-routes.test.js` | Control de acceso a `GET /api/usuarios` sin sesión, con Gestión Académica y con Administrador General. | 401 sin token, 403 para Gestión Académica y 200 con listado para Administrador General. | Aprobada. |
 
-Última ejecución verificada: **9 suites aprobadas, 63 pruebas aprobadas y 0 fallidas** (`npm test -- --runInBand`).
+Última ejecución verificada: **10 suites aprobadas, 66 pruebas aprobadas y 0 fallidas** (`npm test -- --runInBand`).
 
 ## Roles y permisos
 
