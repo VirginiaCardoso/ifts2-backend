@@ -1,115 +1,197 @@
 # IFTS N°2 Backend
 
-### ¿Cómo instalar el proyecto?
+API REST del sistema académico del IFTS N°2, desarrollada con Node.js, Express y MySQL. Este documento describe cómo instalar y configurar el proyecto, crear y poblar la base de datos, ejecutar el servidor y las pruebas, y consultar todas las rutas disponibles.
 
-#### Desde la terminal:
+## Requisitos
 
-- Clonar el proyecto:
-````
+- Node.js y npm.
+- MySQL en ejecución y un cliente para ejecutar scripts SQL, por ejemplo MySQL Workbench o HeidiSQL.
+- Acceso a una cuenta MySQL con permisos para crear la base y sus tablas.
+
+## Instalación
+
+Cloná el repositorio e instalá sus dependencias desde la raíz:
+
+```sh
 git clone https://github.com/VirginiaCardoso/ifts2-backend.git
-
-````
-
-- Para instalar las dependencias correr: 
-````
+cd ifts2-backend
 npm install
-````
+```
 
-### Configurar la base de datos
+## Configuración
 
-El proyecto utiliza MySQL. Primero, asegurate de tener el servidor MySQL iniciado, por ejemplo: MYSQL Workbench (https://www.mysql.com/products/workbench/) o Heidi db (https://www.heidisql.com/).
-
-Crea un archivo .env dentro de la carpeta src basándote en el archivo .env.example, con los siguientes datos de conexión
+Copiá `src/.env.example` como `src/.env` y completá las credenciales locales. El servidor carga este archivo desde `src/`.
 
 ```env
+PORT=3000
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=tu_contraseña
 DB_NAME=sistema_academico
 DB_PORT=3306
-PORT=3000
-JWT_SECRET=tu_super_secreto
+JWT_SECRET=una_clave_local_segura
 JWT_EXPIRES_IN=8h
 ```
 
-Reemplazá `DB_USER` y `DB_PASSWORD` por las credenciales de tu instalación de MySQL. La base de datos `sistema_academico` es la que utiliza el script SQL y la configuración del backend.
+El nombre de la base debe ser `sistema_academico`, que es el que utilizan los scripts SQL. No subas `src/.env` ni credenciales reales al repositorio.
 
-#### Ejecutar el script SQL para crear la base de datos
+El envío del formulario de contacto necesita además las variables SMTP `DEV_EMAIL_HOST`, `DEV_EMAIL_PORT`, `DEV_EMAIL_USER`, `DEV_EMAIL_PASS` y `DEV_EMAIL_RECEIVER` en desarrollo. Para producción, el controlador usa las variables `PROD_EMAIL_*` y requiere `NODE_ENV=production`. El endpoint envía correos; configurá un buzón de pruebas (por ejemplo, Mailtrap) durante el desarrollo.
 
-Desde la raíz del proyecto, ejecutá el archivo `src/database/ifts2-db.sql` con el cliente de MySQL
+## Crear y poblar la base de datos
 
+Para una instalación nueva solo necesitás ejecutar estos dos scripts, en este orden:
 
-Ingresá la contraseña de MySQL cuando se solicite. También podés abrir `src/database/ifts2-db.sql` desde el gestor de base de datos y ejecutar el script. Este crea la base de datos `sistema_academico` y sus tablas.
+1. `src/database/ifts2-db.sql`: crea la base `sistema_academico` y sus tablas.
+2. `src/database/seed.sql`: carga los datos iniciales en esa base.
 
-#### Ejecutar el script para poblar la base de datos con datos iniciales
+Podés abrir cada archivo desde Workbench o HeidiSQL y ejecutar su contenido. También podés ejecutarlos desde `cmd.exe`, en la raíz del proyecto:
 
-Desde la raíz del proyecto, ejecutá el archivo `src/database/seed.sql` con el cliente de MySQL
-
-### Levantar el servidor de la Api: 
-````
-npm run dev
-````
-
-### Ejecutar pruebas
-
-````
-npm run test
-````
-### Pruebas del Formulario de Contacto (Envío de Correos)
-
-El sistema utiliza Nodemailer para gestionar los mensajes del formulario de contacto. Para evitar el envío de correos reales (spam) a la institución durante el desarrollo, el entorno está configurado para utilizar variables de prueba.
-
-### 1. Configuración de Credenciales (Local)
-Antes de probar el endpoint, asegúrate de configurar tu archivo `.env` (ubicado en `src/`) en modo desarrollo. Puedes usar un servicio como [Mailtrap](https://mailtrap.io/) o una cuenta de Gmail personal.
-
-```env
-# Define el entorno como desarrollo
-NODE_ENV=development
-
-# Configuración del servidor SMTP de prueba
-DEV_EMAIL_HOST=sandbox.smtp.mailtrap.io  # o smtp.gmail.com
-DEV_EMAIL_PORT=2525                      # o 465
-DEV_EMAIL_USER=tu_usuario_de_prueba
-DEV_EMAIL_PASS=tu_password_de_prueba
-DEV_EMAIL_RECEIVER=correo_donde_quieres_recibir_la_prueba@dominio.com
+```cmd
+mysql -u root -p < src/database/ifts2-db.sql
+mysql -u root -p sistema_academico < src/database/seed.sql
 ```
 
-### Rutas de la API
+Ingresá la contraseña cuando el cliente la solicite. No hace falta ejecutar migraciones ni seeds complementarios para una instalación inicial. `src/database/migrations/` y los comandos `seed:carrera` y `seed:correlatividades` son para casos de actualización o carga complementaria descritos en sus guías; no reemplazan a los dos scripts anteriores. No ejecutes una carga complementaria sobre datos ya existentes sin revisar primero su documentación.
 
-La URL base local es `http://localhost:3000` (o el valor configurado en `PORT`). Las rutas protegidas requieren enviar el token JWT en el encabezado `Authorization: Bearer <token>`.
+El seed incluye cuentas locales de prueba. En una base nueva, las guías de pruebas usan `aruidiaz@ifts2.edu.ar` y `mcanovi@ifts2.edu.ar`, ambas con contraseña inicial `123456`. Cambiá esas contraseñas y no reutilices estas credenciales en producción.
+
+## Ejecutar el servidor
+
+Desde la raíz:
+
+```sh
+npm run dev
+```
+
+La API queda disponible en `http://localhost:3000` (o en el puerto indicado por `PORT`). La ruta `GET /` devuelve un mensaje para comprobar que el servidor está activo.
+
+## Pruebas automatizadas
+
+Las pruebas usan Jest y Supertest. `npm test` ejecuta todas las suites; `--runInBand` las ejecuta en serie y facilita el diagnóstico:
+
+```sh
+npm test -- --runInBand
+```
+
+Para ejecutar una suite puntual:
+
+```sh
+npm test -- --runInBand src/test/contacto.test.js
+```
+
+En PowerShell de Windows también podés usar `npm.cmd` en lugar de `npm`. Para las suites que acceden a MySQL, iniciá el servidor de base de datos, configurá `src/.env` y prepará `sistema_academico` con los dos scripts de la sección anterior. Ejecutá estas pruebas solo contra una base local de desarrollo: las suites de integración crean, modifican y eliminan registros temporales y algunas usan las cuentas iniciales. Los logins de prueba pueden actualizar su último acceso. La suite de Carrera crea una base de datos temporal aislada y necesita permisos de creación y eliminación de bases. No ejecutes la suite sobre producción.
+
+La suite de Contacto simula Nodemailer: no envía correos reales ni necesita conectarse a un SMTP. La suite unitaria de Ingresantes usa una base de datos simulada.
+
+| Suite | Qué se probó | Resultado esperado | Resultado obtenido en la última ejecución |
+|---|---|---|---|
+| `usuariosAuth.test.js` | Login de ambos roles; CRUD de usuarios; autorización por rol; cambio de contraseña y validaciones. | Tokens para credenciales válidas, operaciones permitidas para Administrador General y rechazo de operaciones/contraseñas inválidas. | Aprobada. |
+| `tramites.test.js` | CRUD, persistencia, campos e IDs inválidos, descripción opcional y protección de escrituras. | Respuestas correctas para operaciones válidas y rechazo de datos inválidos o accesos no autorizados. | Aprobada. |
+| `profesores.test.js` | CRUD, consultas públicas, permisos, validaciones y efecto de claves foráneas al eliminar. | Persistencia de los cambios; errores apropiados para datos inválidos o permisos insuficientes; conservación de registros relacionados según el esquema. | Aprobada. |
+| `novedades.test.js` | Lectura, escritura autorizada, validaciones y uso del autor asociado al token. | CRUD válido y rechazo de accesos no autorizados o datos inválidos. | Aprobada. |
+| `gestionAcademica.test.js` | CRUD y filtros de mesas y horarios, reglas de fechas/horas/referencias, permisos y transacciones. | Datos persistidos y filtrados correctamente; validaciones aplicadas y cambios revertidos ante fallos transaccionales. | Aprobada. |
+| `carrera.test.js` | Materias, docentes asignados, reglas de correlatividad, aviso, PDFs, materias anuales y seeds complementarios. | Operaciones válidas persistidas; restricciones, permisos y reversión ante fallos respetados; seeds repetibles sin duplicaciones. | Aprobada. |
+| `contacto.test.js` | Campos obligatorios, asuntos permitidos y envío simulado mediante Nodemailer. | Datos incompletos o asunto inválido rechazados sin enviar; consulta válida procesada y correo simulado. | Aprobada. |
+| `ingresantes-controller.test.js` | Creación y actualización de etapas de ingreso con fechas opcionales o parciales y fechas inválidas. | Fechas omitidas guardadas como `NULL`; fechas inválidas rechazadas sin ejecutar consultas. | Aprobada. |
+
+Última ejecución verificada: **8 suites aprobadas, 53 pruebas aprobadas y 0 fallidas** (`npm test -- --runInBand`).
+
+## Rutas de la API
+
+URL base local: `http://localhost:3000`. Las rutas protegidas requieren el encabezado `Authorization: Bearer <token>`, obtenido mediante `POST /api/auth/login`. Los roles usados por la API son `Administrador General` y `Gestión Académica`. `:id` y `:tipo` representan parámetros de ruta.
 
 | Método | Ruta | Acceso | Descripción |
 |---|---|---|---|
-| GET | `/` | Público | Verifica que la API esté funcionando. |
-| POST | `/api/auth/login` | Público | Inicia sesión. |
-| PUT | `/api/auth/cambiar-password` | Autenticado | Cambia la contraseña del usuario autenticado. |
-| GET | `/api/usuarios` | Administrador General | Lista los usuarios. |
+| GET | `/` | Público | Comprueba que la API está activa. |
+| POST | `/api/auth/login` | Público | Inicia sesión y devuelve el token JWT. |
+| PUT | `/api/auth/cambiar-password` | Usuario autenticado | Cambia la contraseña del usuario autenticado. |
+| GET | `/api/usuarios` | Administrador General | Lista usuarios. |
 | POST | `/api/usuarios` | Administrador General | Crea un usuario. |
 | PUT | `/api/usuarios/:id` | Administrador General | Actualiza un usuario. |
 | DELETE | `/api/usuarios/:id` | Administrador General | Elimina un usuario. |
-| GET | `/api/novedades` | Público | Lista las novedades. |
+| PUT | `/api/usuarios/:id/password` | Administrador General | Cambia la contraseña de un usuario. |
+| GET | `/api/novedades` | Público | Lista novedades. |
 | GET | `/api/novedades/:id` | Público | Obtiene una novedad. |
-| POST | `/api/novedades` | Administrador General o Gestión Académica | Crea una novedad. |
-| PUT | `/api/novedades/:id` | Administrador General o Gestión Académica | Actualiza una novedad. |
-| DELETE | `/api/novedades/:id` | Administrador General o Gestión Académica | Elimina una novedad. |
-| GET | `/api/profesores` | Público | Lista los profesores. |
+| POST | `/api/novedades` | Administrador General / Gestión Académica | Crea una novedad. |
+| PUT | `/api/novedades/:id` | Administrador General / Gestión Académica | Actualiza una novedad. |
+| DELETE | `/api/novedades/:id` | Administrador General / Gestión Académica | Elimina una novedad. |
+| GET | `/api/profesores` | Público | Lista profesores. |
 | GET | `/api/profesores/:id` | Público | Obtiene un profesor. |
-| POST | `/api/profesores` | Administrador General o Gestión Académica | Crea un profesor. |
-| PUT | `/api/profesores/:id` | Administrador General o Gestión Académica | Actualiza un profesor. |
-| DELETE | `/api/profesores/:id` | Administrador General o Gestión Académica | Elimina un profesor. |
-| POST | `/api/contacto` | Público | Envía una consulta desde el formulario de contacto. |
-### CRUD de Trámites
+| POST | `/api/profesores` | Administrador General / Gestión Académica | Crea un profesor. |
+| PUT | `/api/profesores/:id` | Administrador General / Gestión Académica | Actualiza un profesor. |
+| DELETE | `/api/profesores/:id` | Administrador General / Gestión Académica | Elimina un profesor. |
+| GET | `/api/materias` | Público | Lista materias. |
+| GET | `/api/materias/:id` | Público | Obtiene una materia. |
+| POST | `/api/materias` | Administrador General / Gestión Académica | Crea una materia. |
+| PUT | `/api/materias/:id` | Administrador General / Gestión Académica | Actualiza una materia. |
+| PATCH | `/api/materias/:id/promocional` | Administrador General / Gestión Académica | Actualiza el estado promocional de una materia. |
+| PUT | `/api/materias/:id/profesores` | Administrador General / Gestión Académica | Asigna profesores a una materia. |
+| DELETE | `/api/materias/:id` | Administrador General / Gestión Académica | Elimina una materia. |
+| GET | `/api/carrera` | Público | Obtiene la información del plan de estudios. |
+| PUT | `/api/carrera/aviso` | Administrador General / Gestión Académica | Actualiza el aviso de Carrera. |
+| POST | `/api/carrera/correlatividades` | Administrador General / Gestión Académica | Crea una regla de correlatividad. |
+| PUT | `/api/carrera/correlatividades/:id` | Administrador General / Gestión Académica | Actualiza una regla. |
+| DELETE | `/api/carrera/correlatividades/:id` | Administrador General / Gestión Académica | Elimina una regla. |
+| GET | `/api/carrera/documentos/:tipo/archivo` | Público | Descarga el PDF oficial del tipo indicado. |
+| PUT | `/api/carrera/documentos/:tipo` | Administrador General / Gestión Académica | Carga o reemplaza un PDF (`application/pdf`, máximo 10 MB). |
+| DELETE | `/api/carrera/documentos/:tipo` | Administrador General / Gestión Académica | Elimina el PDF del tipo indicado. |
+| GET | `/api/ingresantes` | Público | Lista etapas de ingreso. |
+| GET | `/api/ingresantes/:id` | Público | Obtiene una etapa de ingreso. |
+| POST | `/api/ingresantes` | Administrador General / Gestión Académica | Crea una etapa. |
+| PUT | `/api/ingresantes/:id` | Administrador General / Gestión Académica | Actualiza una etapa. |
+| DELETE | `/api/ingresantes/:id` | Administrador General / Gestión Académica | Elimina una etapa. |
+| GET | `/api/tramites` | Público | Lista trámites. |
+| GET | `/api/tramites/:id` | Público | Obtiene un trámite. |
+| POST | `/api/tramites` | Administrador General / Gestión Académica | Crea un trámite. |
+| PUT | `/api/tramites/:id` | Administrador General / Gestión Académica | Actualiza un trámite. |
+| DELETE | `/api/tramites/:id` | Administrador General / Gestión Académica | Elimina un trámite. |
+| GET | `/api/mesas-examenes` | Público | Lista mesas; admite filtros de año y materia. |
+| GET | `/api/mesas-examenes/:id` | Público | Obtiene una mesa. |
+| POST | `/api/mesas-examenes` | Administrador General / Gestión Académica | Crea una mesa y su tribunal. |
+| PUT | `/api/mesas-examenes/:id` | Administrador General / Gestión Académica | Actualiza una mesa y su tribunal. |
+| DELETE | `/api/mesas-examenes/:id` | Administrador General / Gestión Académica | Elimina una mesa. |
+| GET | `/api/horarios-cursada` | Público | Lista horarios; admite filtros de año, cuatrimestre, materia y día. |
+| GET | `/api/horarios-cursada/:id` | Público | Obtiene un horario. |
+| POST | `/api/horarios-cursada` | Administrador General / Gestión Académica | Crea un horario. |
+| PUT | `/api/horarios-cursada/:id` | Administrador General / Gestión Académica | Actualiza un horario. |
+| DELETE | `/api/horarios-cursada/:id` | Administrador General / Gestión Académica | Elimina un horario. |
+| POST | `/api/contacto` | Público | Envía una consulta por correo. |
+| GET | `/api/autoridades` | Administrador General | Lista autoridades. |
+| POST | `/api/autoridades` | Administrador General | Crea una autoridad. |
+| PUT | `/api/autoridades/:id` | Administrador General | Actualiza una autoridad. |
+| DELETE | `/api/autoridades/:id` | Administrador General | Elimina una autoridad. |
+| GET | `/api/bedeles` | Administrador General | Lista bedeles. |
+| POST | `/api/bedeles` | Administrador General | Crea un bedel. |
+| PUT | `/api/bedeles/:id` | Administrador General | Actualiza un bedel. |
+| DELETE | `/api/bedeles/:id` | Administrador General | Elimina un bedel. |
+| GET | `/api/enlaces-externos` | Administrador General | Lista enlaces externos. |
+| PUT | `/api/enlaces-externos/:id` | Administrador General | Actualiza un enlace. |
+| GET | `/api/documentos/ingresantes` | Público | Consulta el documento de ingresantes. |
+| GET | `/api/documentos/ingresantes/descargar` | Público | Descarga el documento de ingresantes. |
+| POST | `/api/documentos/ingresantes` | Administrador General / Gestión Académica | Carga un PDF en el campo multipart `documento`. |
 
-Documentación de endpoints, validaciones y pruebas en Thunder Client: [docs/tramites.md](docs/tramites.md). Usa la tabla existente tramites_requisitos, sin migraciones SQL.
+Las rutas rutas protegidas requieren un token JWT de un usuario con rol Administrador General o Gestión Académica, segpun corresponda. 
 
-### Gestión Académica: horarios y exámenes
+Consultá las guías enlazadas para formatos, validaciones, filtros, códigos de respuesta y ejemplos de uso:
 
-Contrato de API, formatos para la pantalla y pruebas en Thunder Client: [docs/gestion-academica.md](docs/gestion-academica.md). La carga complementaria de materias y promocionales agrega soporte anual en bases anteriores; ver la guía antes de ejecutar seeds.
+- [CRUD de trámites](docs/tramites.md).
+- [Horarios y mesas de examen](docs/gestion-academica.md).
+- [Carrera y plan de estudios](docs/carrera.md).
+- [Plantel docente](docs/plantel-docente.md).
 
-### Carrera y Plan de Estudios
+## Formulario de contacto y correo de prueba
 
-CRUD de materias, asignación de docentes, promocionables, correlatividades, aviso y PDF oficiales: [docs/carrera.md](docs/carrera.md). La carga complementaria de materias y promocionales agrega soporte anual en bases anteriores; ver la guía antes de ejecutar seeds.
+`POST /api/contacto` recibe JSON con `nombre`, `correo`, `asunto` y `mensaje`. Los campos son obligatorios y el asunto debe estar dentro de las opciones aceptadas por el controlador. Configurá las variables `DEV_EMAIL_*` descritas arriba para enviar mensajes a una bandeja de prueba; no uses destinatarios reales durante las pruebas automatizadas.
 
-Carga complementaria (no usar el seed general sobre una base ya cargada): `npm.cmd run seed:carrera` previsualiza y `npm.cmd run seed:carrera -- --apply` aplica las materias y promocionales proporcionados.
+## Comandos disponibles
 
-Correlatividades: después del plan, `npm.cmd run seed:correlatividades` previsualiza y `npm.cmd run seed:correlatividades -- --apply` carga las reglas simplificadas de dos categorías sin duplicarlas.
+| Comando | Uso |
+|---|---|
+| `npm run dev` | Inicia el servidor con nodemon. |
+| `npm test` | Ejecuta todas las pruebas Jest. |
+| `npm run seed:carrera` | Previsualiza la carga complementaria de materias/promocionales. |
+| `npm run seed:carrera -- --apply` | Aplica esa carga complementaria. |
+| `npm run seed:correlatividades` | Previsualiza la carga de reglas simplificadas. |
+| `npm run seed:correlatividades -- --apply` | Aplica esa carga complementaria. |
+
+Los seeds complementarios están pensados para bases que ya tienen el esquema principal. Revisá [Carrera y plan de estudios](docs/carrera.md) antes de usarlos.

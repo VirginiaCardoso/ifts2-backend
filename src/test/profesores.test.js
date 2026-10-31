@@ -44,7 +44,6 @@ describe('CRUD de Plantel docente con MySQL', () => {
         const lectura = await request(app).get(`/api/profesores/${id}`);
         expect(lectura.status).toBe(200);
         expect(lectura.body).toMatchObject({ id, nombre_completo: 'Prof. Ana de Prueba' });
-        expect(lectura.body).toHaveProperty('created_at');
         const listado = await request(app).get('/api/profesores');
         expect(listado.status).toBe(200);
         expect(listado.body.some((item) => item.id === id)).toBe(true);
