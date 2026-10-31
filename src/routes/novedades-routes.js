@@ -4,7 +4,7 @@ const { obtenerNovedades, guardarNovedad, eliminarNovedad } = require('../contro
 
 router.get('/', obtenerNovedades);
 router.get('/:id', obtenerNovedades);
-router.use(verificarToken, verificarRol(['Administrador General', 'Gestión Académica']));
+router.use(verificarToken, verificarRol(['Administrador General']));
 router.post('/', guardarNovedad);
 router.put('/:id', guardarNovedad);
 router.delete('/:id', eliminarNovedad);

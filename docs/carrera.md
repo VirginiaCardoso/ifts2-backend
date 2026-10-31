@@ -8,9 +8,11 @@ Rama de implementación: feature/carrera en backend y frontend. La pantalla usa 
 2. Ingresar a la Intranet desde el pie de página, con una cuenta existente de Administrador General o Gestión Académica.
 3. Seleccionar Carrera en el menú.
 
-Ambos roles tienen acceso a las escrituras. Las consultas y los PDF son públicos. Los cambios se guardan al confirmar cada acción; no hay un botón de guardado general. La portada consulta los datos al cargar, cuando recibe una señal de guardado desde otra pestaña del mismo navegador y al volver a estar visible o recuperar el foco. No requiere recarga manual para cambios realizados desde el panel en ese navegador.
+Administrador General puede editar toda la sección. Gestión Académica puede editar materias, correlatividades y documentos PDF, pero no el aviso institucional. Las consultas y los PDF son públicos. Los cambios se guardan al confirmar cada acción; no hay un botón de guardado general. La portada consulta los datos al cargar, cuando recibe una señal de guardado desde otra pestaña del mismo navegador y al volver a estar visible o recuperar el foco. No requiere recarga manual para cambios realizados desde el panel en ese navegador.
 
 ## Materias
+
+Las escrituras de materias y correlatividades están permitidas para Administrador General y Gestión Académica. Solo Administrador General puede modificar el aviso institucional.
 
 El panel organiza tres años y dos cuatrimestres. Los contadores y docentes provienen de MySQL.
 
@@ -89,9 +91,9 @@ PUT /api/carrera/aviso recibe `{ "aviso": "Ciclo 2027: Inscripciones abiertas" }
 
 Tipos admitidos: resolucion, promocionables y correlatividades. Cada tipo tiene un PDF vigente, con opciones Subir, Ver, Reemplazar y Eliminar con confirmación. El backend guarda los archivos con nombres UUID y verifica tamaño, extensión y firma inicial PDF. Límite: 10 MB. Esta comprobación no constituye un análisis antivirus ni una validación completa del contenido del documento.
 
-- PUT /api/carrera/documentos/:tipo: bytes del archivo como Body binario, Content-Type: application/pdf y X-File-Name con el nombre original codificado con encodeURIComponent. Requiere token. No usa multipart/form-data.
+- PUT /api/carrera/documentos/:tipo: bytes del archivo como Body binario, Content-Type: application/pdf y X-File-Name con el nombre original codificado con encodeURIComponent. Requiere token de Administrador General o Gestión Académica. No usa multipart/form-data.
 - GET /api/carrera/documentos/:tipo/archivo: sirve el PDF para vista/descarga, públicamente.
-- DELETE /api/carrera/documentos/:tipo: elimina el PDF vigente y su referencia. Requiere token.
+- DELETE /api/carrera/documentos/:tipo: elimina el PDF vigente y su referencia. Requiere token de Administrador General o Gestión Académica.
 
 Guardar el nombre original solo como metadata evita usar rutas aportadas por el usuario. Los archivos están en uploads/carrera/, excluidos de Git; la metadata está en configuracion_institucional con claves carrera.pdf.TIPO. Al reemplazar, primero se guarda la nueva referencia y luego se limpia el archivo anterior. Al desplegar o mover el backend, preservar esa carpeta junto con la base de datos. Para varios servidores se necesitará almacenamiento compartido; esta entrega usa almacenamiento local.
 

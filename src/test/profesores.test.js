@@ -63,10 +63,12 @@ describe('CRUD de Plantel docente con MySQL', () => {
         expect(restantes).toHaveLength(0);
     });
 
-    test('permite el CRUD a Gestión Académica', async () => {
-        const id = await crear(tokenGestion);
-        expect((await request(app).put(`/api/profesores/${id}`).auth(tokenGestion, { type: 'bearer' }).send({ nombre_completo: 'Docente actualizado por Gestión' })).status).toBe(200);
-        expect((await request(app).delete(`/api/profesores/${id}`).auth(tokenGestion, { type: 'bearer' })).status).toBe(200);
+    test('rechaza la gestión de profesores para Gestión Académica', async () => {
+        const id = await crear(tokenAdmin);
+        expect((await request(app).post('/api/profesores').auth(tokenGestion, { type: 'bearer' }).send({ nombre_completo: 'Docente no autorizado' })).status).toBe(403);
+        expect((await request(app).put(`/api/profesores/${id}`).auth(tokenGestion, { type: 'bearer' }).send({ nombre_completo: 'Cambio no autorizado' })).status).toBe(403);
+        expect((await request(app).delete(`/api/profesores/${id}`).auth(tokenGestion, { type: 'bearer' })).status).toBe(403);
+        expect((await request(app).get(`/api/profesores/${id}`)).body.nombre_completo).toBe('Docente temporal de prueba');
     });
 
     test('rechaza escrituras sin token, con token inválido o sin el rol requerido', async () => {

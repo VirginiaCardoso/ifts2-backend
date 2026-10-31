@@ -9,9 +9,8 @@ const {
     eliminarAutoridad
 } = require('../controllers/autoridades-controller');
 
-router.use(verificarToken, verificarRol(['Administrador General']));
-
 router.get('/', obtenerAutoridades);
+router.use(verificarToken, verificarRol(['Administrador General']));
 router.post('/', crearAutoridad);
 router.put('/:id', actualizarAutoridad);
 router.delete('/:id', eliminarAutoridad);

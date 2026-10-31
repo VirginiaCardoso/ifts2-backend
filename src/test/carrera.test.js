@@ -353,6 +353,14 @@ describe("Carrera en base temporal aislada", () => {
         await request(app)
           .put("/api/carrera/aviso")
           .set(auth(gestion))
+          .send({ aviso: "Cambio no autorizado" })
+      ).status,
+    ).toBe(403);
+    expect(
+      (
+        await request(app)
+          .put("/api/carrera/aviso")
+          .set(auth(admin))
           .send({ aviso: "Ciclo 2027: Inscripciones abiertas" })
       ).status,
     ).toBe(200);
@@ -365,7 +373,7 @@ describe("Carrera en base temporal aislada", () => {
         (
           await request(app)
             .put(url)
-            .set(auth())
+            .set(auth(gestion))
             .set("Content-Type", "application/pdf")
             .set("X-File-Name", "prueba.pdf")
             .send(pdf)
@@ -391,7 +399,7 @@ describe("Carrera en base temporal aislada", () => {
         (
           await request(app)
             .put(url)
-            .set(auth())
+            .set(auth(gestion))
             .set("Content-Type", "application/pdf")
             .set("X-File-Name", "reemplazo.pdf")
             .send(pdf)
@@ -400,7 +408,7 @@ describe("Carrera en base temporal aislada", () => {
       expect(
         (await request(app).get("/api/carrera")).body.documentos[tipo].nombre,
       ).toBe("reemplazo.pdf");
-      expect((await request(app).delete(url).set(auth())).status).toBe(200);
+      expect((await request(app).delete(url).set(auth(gestion))).status).toBe(200);
       expect((await request(app).get(`${url}/archivo`)).status).toBe(404);
     }
     expect(

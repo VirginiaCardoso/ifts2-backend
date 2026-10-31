@@ -42,29 +42,14 @@ describe('CRUD de novedades con MySQL', () => {
         const [restantes] = await promisePool.query('SELECT id FROM novedades WHERE id = ?', [id]);
         expect(restantes).toHaveLength(0);
     });
-    test('crea un borrador con el autor del token de Gestión Académica e ignora autores enviados en el body', async () => {
+    test('rechaza escrituras de novedades para Gestión Académica', async () => {
         const login = await request(app).post('/api/auth/login').send({ correo: 'mcanovi@ifts2.edu.ar', password: '123456' });
         expect(login.status).toBe(200);
-        const autorId = login.body.usuario.id;
-        let borradorId;
-        try {
-            const creado = await request(app).post('/api/novedades')
-                .set('Authorization', `Bearer ${login.body.token}`)
-                .send({ ...nueva, titulo: 'Borrador temporal de Gestión Académica', estado: 'Borrador', usuario_id: 1 });
-            borradorId = creado.body.novedadId;
-            expect(creado.status).toBe(201);
-            expect(Number.isInteger(borradorId)).toBe(true);
-            const [rows] = await promisePool.query('SELECT usuario_id, estado FROM novedades WHERE id = ?', [borradorId]);
-            expect(rows[0]).toMatchObject({ usuario_id: autorId, estado: 'Borrador' });
-            const publico = await request(app).get('/api/novedades');
-            expect(publico.status).toBe(200);
-            expect(publico.body.some((item) => item.id === borradorId)).toBe(false);
-            const administrativo = await request(app).get('/api/novedades?admin=true')
-                .set('Authorization', `Bearer ${login.body.token}`);
-            expect(administrativo.status).toBe(200);
-            expect(administrativo.body.some((item) => item.id === borradorId)).toBe(true);
-        } finally {
-            if (borradorId) await promisePool.query('DELETE FROM novedades WHERE id = ?', [borradorId]);
-        }
+        const auth = { Authorization: `Bearer ${login.body.token}` };
+        expect((await request(app).post('/api/novedades').set(auth).send(nueva)).status).toBe(403);
+        expect((await request(app).put('/api/novedades/1').set(auth).send(nueva)).status).toBe(403);
+        expect((await request(app).delete('/api/novedades/1').set(auth)).status).toBe(403);
+        expect((await request(app).get('/api/novedades?admin=true')).status).toBe(200);
+        expect((await request(app).get('/api/novedades?admin=true').set(auth)).status).toBe(200);
     });
 });

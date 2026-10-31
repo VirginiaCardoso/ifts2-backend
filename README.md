@@ -93,8 +93,16 @@ La suite de Contacto simula Nodemailer: no envía correos reales ni necesita con
 | `carrera.test.js` | Materias, docentes asignados, reglas de correlatividad, aviso, PDFs, materias anuales y seeds complementarios. | Operaciones válidas persistidas; restricciones, permisos y reversión ante fallos respetados; seeds repetibles sin duplicaciones. | Aprobada. |
 | `contacto.test.js` | Campos obligatorios, asuntos permitidos y envío simulado mediante Nodemailer. | Datos incompletos o asunto inválido rechazados sin enviar; consulta válida procesada y correo simulado. | Aprobada. |
 | `ingresantes-controller.test.js` | Creación y actualización de etapas de ingreso con fechas opcionales o parciales y fechas inválidas. | Fechas omitidas guardadas como `NULL`; fechas inválidas rechazadas sin ejecutar consultas. | Aprobada. |
+| `rutasAdminPublicas.test.js` | Acceso público de GET y control por rol en escrituras de autoridades, bedeles y enlaces externos. | GET accesibles sin token; escrituras solo para Administrador General. | Aprobada. |
 
-Última ejecución verificada: **8 suites aprobadas, 53 pruebas aprobadas y 0 fallidas** (`npm test -- --runInBand`).
+Última ejecución verificada: **9 suites aprobadas, 63 pruebas aprobadas y 0 fallidas** (`npm test -- --runInBand`).
+
+## Roles y permisos
+
+- **Administrador General:** puede editar todas las secciones y administrar usuarios.
+- **Gestión Académica:** puede editar etapas de ingreso, documentos, horarios de cursada, mesas de examen, correlatividades y materias.
+
+Los `GET` de información institucional son públicos; `GET /api/usuarios` es la excepción porque expone datos de cuentas y requiere Administrador General. `GET /api/novedades` es público, incluso con `?admin=true`, que incluye borradores. Las operaciones de escritura requieren autenticación y el rol autorizado para esa sección. Gestión Académica no puede administrar usuarios ni editar novedades, plantel, trámites, autoridades, bedeles o enlaces externos; Administrador General conserva acceso a todas las secciones.
 
 ## Rutas de la API
 
@@ -112,14 +120,14 @@ URL base local: `http://localhost:3000`. Las rutas protegidas requieren el encab
 | PUT | `/api/usuarios/:id/password` | Administrador General | Cambia la contraseña de un usuario. |
 | GET | `/api/novedades` | Público | Lista novedades. |
 | GET | `/api/novedades/:id` | Público | Obtiene una novedad. |
-| POST | `/api/novedades` | Administrador General / Gestión Académica | Crea una novedad. |
-| PUT | `/api/novedades/:id` | Administrador General / Gestión Académica | Actualiza una novedad. |
-| DELETE | `/api/novedades/:id` | Administrador General / Gestión Académica | Elimina una novedad. |
+| POST | `/api/novedades` | Administrador General | Crea una novedad. |
+| PUT | `/api/novedades/:id` | Administrador General | Actualiza una novedad. |
+| DELETE | `/api/novedades/:id` | Administrador General | Elimina una novedad. |
 | GET | `/api/profesores` | Público | Lista profesores. |
 | GET | `/api/profesores/:id` | Público | Obtiene un profesor. |
-| POST | `/api/profesores` | Administrador General / Gestión Académica | Crea un profesor. |
-| PUT | `/api/profesores/:id` | Administrador General / Gestión Académica | Actualiza un profesor. |
-| DELETE | `/api/profesores/:id` | Administrador General / Gestión Académica | Elimina un profesor. |
+| POST | `/api/profesores` | Administrador General | Crea un profesor. |
+| PUT | `/api/profesores/:id` | Administrador General | Actualiza un profesor. |
+| DELETE | `/api/profesores/:id` | Administrador General | Elimina un profesor. |
 | GET | `/api/materias` | Público | Lista materias. |
 | GET | `/api/materias/:id` | Público | Obtiene una materia. |
 | POST | `/api/materias` | Administrador General / Gestión Académica | Crea una materia. |
@@ -128,7 +136,7 @@ URL base local: `http://localhost:3000`. Las rutas protegidas requieren el encab
 | PUT | `/api/materias/:id/profesores` | Administrador General / Gestión Académica | Asigna profesores a una materia. |
 | DELETE | `/api/materias/:id` | Administrador General / Gestión Académica | Elimina una materia. |
 | GET | `/api/carrera` | Público | Obtiene la información del plan de estudios. |
-| PUT | `/api/carrera/aviso` | Administrador General / Gestión Académica | Actualiza el aviso de Carrera. |
+| PUT | `/api/carrera/aviso` | Administrador General | Actualiza el aviso de Carrera. |
 | POST | `/api/carrera/correlatividades` | Administrador General / Gestión Académica | Crea una regla de correlatividad. |
 | PUT | `/api/carrera/correlatividades/:id` | Administrador General / Gestión Académica | Actualiza una regla. |
 | DELETE | `/api/carrera/correlatividades/:id` | Administrador General / Gestión Académica | Elimina una regla. |
@@ -142,9 +150,9 @@ URL base local: `http://localhost:3000`. Las rutas protegidas requieren el encab
 | DELETE | `/api/ingresantes/:id` | Administrador General / Gestión Académica | Elimina una etapa. |
 | GET | `/api/tramites` | Público | Lista trámites. |
 | GET | `/api/tramites/:id` | Público | Obtiene un trámite. |
-| POST | `/api/tramites` | Administrador General / Gestión Académica | Crea un trámite. |
-| PUT | `/api/tramites/:id` | Administrador General / Gestión Académica | Actualiza un trámite. |
-| DELETE | `/api/tramites/:id` | Administrador General / Gestión Académica | Elimina un trámite. |
+| POST | `/api/tramites` | Administrador General | Crea un trámite. |
+| PUT | `/api/tramites/:id` | Administrador General | Actualiza un trámite. |
+| DELETE | `/api/tramites/:id` | Administrador General | Elimina un trámite. |
 | GET | `/api/mesas-examenes` | Público | Lista mesas; admite filtros de año y materia. |
 | GET | `/api/mesas-examenes/:id` | Público | Obtiene una mesa. |
 | POST | `/api/mesas-examenes` | Administrador General / Gestión Académica | Crea una mesa y su tribunal. |
@@ -156,21 +164,21 @@ URL base local: `http://localhost:3000`. Las rutas protegidas requieren el encab
 | PUT | `/api/horarios-cursada/:id` | Administrador General / Gestión Académica | Actualiza un horario. |
 | DELETE | `/api/horarios-cursada/:id` | Administrador General / Gestión Académica | Elimina un horario. |
 | POST | `/api/contacto` | Público | Envía una consulta por correo. |
-| GET | `/api/autoridades` | Administrador General | Lista autoridades. |
+| GET | `/api/autoridades` | Público | Lista autoridades. |
 | POST | `/api/autoridades` | Administrador General | Crea una autoridad. |
 | PUT | `/api/autoridades/:id` | Administrador General | Actualiza una autoridad. |
 | DELETE | `/api/autoridades/:id` | Administrador General | Elimina una autoridad. |
-| GET | `/api/bedeles` | Administrador General | Lista bedeles. |
+| GET | `/api/bedeles` | Público | Lista bedeles. |
 | POST | `/api/bedeles` | Administrador General | Crea un bedel. |
 | PUT | `/api/bedeles/:id` | Administrador General | Actualiza un bedel. |
 | DELETE | `/api/bedeles/:id` | Administrador General | Elimina un bedel. |
-| GET | `/api/enlaces-externos` | Administrador General | Lista enlaces externos. |
+| GET | `/api/enlaces-externos` | Público | Lista enlaces externos. |
 | PUT | `/api/enlaces-externos/:id` | Administrador General | Actualiza un enlace. |
 | GET | `/api/documentos/ingresantes` | Público | Consulta el documento de ingresantes. |
 | GET | `/api/documentos/ingresantes/descargar` | Público | Descarga el documento de ingresantes. |
 | POST | `/api/documentos/ingresantes` | Administrador General / Gestión Académica | Carga un PDF en el campo multipart `documento`. |
 
-Las rutas rutas protegidas requieren un token JWT de un usuario con rol Administrador General o Gestión Académica, segpun corresponda. 
+Las rutas protegidas requieren un token JWT de un usuario con el rol autorizado para la operación.
 
 Consultá las guías enlazadas para formatos, validaciones, filtros, códigos de respuesta y ejemplos de uso:
 

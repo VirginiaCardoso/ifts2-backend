@@ -10,9 +10,9 @@ URL base local: `http://localhost:3000`.
 | --- | --- | --- | --- |
 | GET | /api/profesores | Público | 200, lista ordenada por nombre e ID |
 | GET | /api/profesores/:id | Público | 200, profesor |
-| POST | /api/profesores | Administrador General / Gestión Académica | 201, mensaje y profesorId |
-| PUT | /api/profesores/:id | Administrador General / Gestión Académica | 200, mensaje y profesorId |
-| DELETE | /api/profesores/:id | Administrador General / Gestión Académica | 200, mensaje |
+| POST | /api/profesores | Administrador General | 201, mensaje y profesorId |
+| PUT | /api/profesores/:id | Administrador General | 200, mensaje y profesorId |
+| DELETE | /api/profesores/:id | Administrador General | 200, mensaje |
 
 POST y PUT reciben un JSON con `nombre_completo`, obligatorio, de 1 a 255 caracteres después de quitar espacios al principio y al final. Se permiten nombres repetidos porque el esquema no establece unicidad. El servidor genera el ID y las fechas; no se modifican materias, horarios ni mesas desde este CRUD.
 
@@ -84,4 +84,4 @@ npm.cmd test -- --runInBand src/test/profesores.test.js src/test/novedades.test.
 
 Ejecutar únicamente en la base local de desarrollo. Las pruebas usan las cuentas iniciales `aruidiaz@ifts2.edu.ar` y `mcanovi@ifts2.edu.ar`, con contraseña `123456`. Crean y limpian registros temporales; el login actualiza el último acceso de esas cuentas. La prueba de relaciones crea también una materia, una mesa y un horario temporales y los elimina al finalizar.
 
-Se verifican las cuatro operaciones, persistencia SQL, consulta pública, ambos roles autorizados, rechazo de escrituras no autorizadas, validación de nombres e IDs, actualización sin cambios, registros inexistentes y comportamiento de las claves foráneas al eliminar.
+Se verifican las cuatro operaciones, persistencia SQL, consulta pública, acceso de escritura exclusivo de Administrador General, rechazo de escrituras no autorizadas, validación de nombres e IDs, actualización sin cambios, registros inexistentes y comportamiento de las claves foráneas al eliminar.

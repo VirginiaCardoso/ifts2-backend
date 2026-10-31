@@ -10,9 +10,9 @@ Base local: `http://localhost:3000`.
 | --- | --- | --- | --- |
 | GET | /api/tramites | Público | 200, lista ordenada por nombre e ID |
 | GET | /api/tramites/:id | Público | 200, registro |
-| POST | /api/tramites | Administrador General / Gestión Académica | 201, mensaje y tramiteId |
-| PUT | /api/tramites/:id | Administrador General / Gestión Académica | 200, mensaje y tramiteId |
-| DELETE | /api/tramites/:id | Administrador General / Gestión Académica | 200, mensaje |
+| POST | /api/tramites | Administrador General | 201, mensaje y tramiteId |
+| PUT | /api/tramites/:id | Administrador General | 200, mensaje y tramiteId |
+| DELETE | /api/tramites/:id | Administrador General | 200, mensaje |
 
 Cada registro consultado incluye id, nombre_tramite, descripcion_requisitos, created_at y updated_at. Una lista vacía devuelve []. Nombre obligatorio de hasta 255 caracteres, sin espacios en los extremos. Descripción opcional, texto de hasta 65535 bytes UTF-8; vacía, omitida o null se guarda como NULL. PUT reemplaza ambos campos: omitir la descripción elimina su valor anterior. El esquema admite nombres repetidos.
 
@@ -74,4 +74,4 @@ Desde la raíz del backend, con MySQL local y src/.env configurados:
 npm.cmd test -- --runInBand src/test/tramites.test.js
 ```
 
-Solo ejecutar en la base local de desarrollo. Usa las cuentas iniciales aruidiaz@ifts2.edu.ar y mcanovi@ifts2.edu.ar con contraseña 123456. Verifica CRUD con ambos roles, persistencia SQL, actualización sin cambios, descripción opcional, límites de datos, IDs inválidos, registros inexistentes y rechazo de escrituras no autorizadas. Crea registros temporales y los limpia al finalizar; el login actualiza el último acceso de las cuentas.
+Solo ejecutar en la base local de desarrollo. Usa las cuentas iniciales aruidiaz@ifts2.edu.ar y mcanovi@ifts2.edu.ar con contraseña 123456. Verifica CRUD con Administrador General, rechazo de escrituras de Gestión Académica, persistencia SQL, actualización sin cambios, descripción opcional, límites de datos, IDs inválidos y registros inexistentes. Crea registros temporales y los limpia al finalizar; el login actualiza el último acceso de las cuentas.

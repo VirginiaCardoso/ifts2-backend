@@ -27,8 +27,8 @@ describe('CRUD de trámites con MySQL', () => {
         expect(Number.isInteger(res.body.tramiteId)).toBe(true);
         return res.body.tramiteId;
     }
-    test.each(['admin', 'gestion'])('persiste el CRUD completo con rol %s', async (rol) => {
-        const token = rol === 'admin' ? admin : gestion;
+    test('persiste el CRUD completo con Administrador General', async () => {
+        const token = admin;
         const id = await crear(token);
         const lectura = await request(app).get(`/api/tramites/${id}`);
         expect(lectura.status).toBe(200);
@@ -47,6 +47,13 @@ describe('CRUD de trámites con MySQL', () => {
         expect((await request(app).delete(`/api/tramites/${id}`).auth(token, { type: 'bearer' })).status).toBe(404);
         const [restantes] = await promisePool.query('SELECT id FROM tramites_requisitos WHERE id = ?', [id]);
         expect(restantes).toHaveLength(0);
+    });
+    test('rechaza las escrituras de trámites para Gestión Académica', async () => {
+        const id = await crear(admin);
+        expect((await request(app).post('/api/tramites').auth(gestion, { type: 'bearer' }).send({ nombre_tramite: 'No autorizado' })).status).toBe(403);
+        expect((await request(app).put(`/api/tramites/${id}`).auth(gestion, { type: 'bearer' }).send({ nombre_tramite: 'No autorizado' })).status).toBe(403);
+        expect((await request(app).delete(`/api/tramites/${id}`).auth(gestion, { type: 'bearer' })).status).toBe(403);
+        expect((await request(app).get(`/api/tramites/${id}`)).body.nombre_tramite).toBe('Trámite temporal');
     });
     test('rechaza nombres, descripciones e IDs inválidos', async () => {
         const id = await crear(admin);

@@ -9,7 +9,7 @@ const {
 
 router.get('/', obtenerProfesores);
 router.get('/:id', obtenerProfesores);
-router.use(verificarToken, verificarRol(['Administrador General', 'Gestión Académica']));
+router.use(verificarToken, verificarRol(['Administrador General']));
 router.post('/', crearProfesor);
 router.put('/:id', actualizarProfesor);
 router.delete('/:id', eliminarProfesor);

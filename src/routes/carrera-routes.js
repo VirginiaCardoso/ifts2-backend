@@ -7,11 +7,16 @@ const c = require("../controllers/carrera-controller");
 const router = express.Router();
 router.get("/", c.obtenerCarrera);
 router.get("/documentos/:tipo/archivo", c.obtenerPdf);
+router.put(
+  "/aviso",
+  verificarToken,
+  verificarRol(["Administrador General"]),
+  c.guardarAviso,
+);
 router.use(
   verificarToken,
   verificarRol(["Administrador General", "Gestión Académica"]),
 );
-router.put("/aviso", c.guardarAviso);
 router.post("/correlatividades", c.guardarRegla);
 router.put("/correlatividades/:id", c.guardarRegla);
 router.delete("/correlatividades/:id", c.eliminarRegla);
