@@ -1,7 +1,6 @@
 CREATE DATABASE IF NOT EXISTS sistema_academico;
 USE sistema_academico;
 
-
 CREATE TABLE usuarios (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre_completo VARCHAR(255) NOT NULL,
@@ -18,7 +17,7 @@ CREATE TABLE materias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(255) NOT NULL,
     anio_carrera ENUM('1', '2', '3') NOT NULL,
-    cuatrimestre INT,
+    cuatrimestre INT NULL,
     es_anual BOOLEAN NOT NULL DEFAULT FALSE,
     es_promocional BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -77,7 +76,6 @@ CREATE TABLE tramites_requisitos (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-
 CREATE TABLE correlatividades (
     id INT AUTO_INCREMENT PRIMARY KEY,
     materia_id INT NOT NULL,
@@ -87,14 +85,14 @@ CREATE TABLE correlatividades (
     FOREIGN KEY (materia_requisito_id) REFERENCES materias(id) ON DELETE CASCADE
 );
 
-CREATE TABLE `profesor_materia` (
-	`profesor_id` INT(11) NOT NULL,
-	`materia_id` INT(11) NOT NULL,
-	`rol` ENUM('titular','ayudante') NOT NULL DEFAULT 'titular' COLLATE 'utf8mb4_general_ci',
-	PRIMARY KEY (`profesor_id`, `materia_id`) USING BTREE,
-	INDEX `materia_id` (`materia_id`) USING BTREE,
-	CONSTRAINT `profesor_materia_ibfk_1` FOREIGN KEY (`profesor_id`) REFERENCES `profesores` (`id`) ON UPDATE RESTRICT ON DELETE CASCADE,
-	CONSTRAINT `profesor_materia_ibfk_2` FOREIGN KEY (`materia_id`) REFERENCES `materias` (`id`) ON UPDATE RESTRICT ON DELETE CASCADE
+CREATE TABLE profesor_materia (
+    profesor_id INT(11) NOT NULL,
+    materia_id INT(11) NOT NULL,
+    rol ENUM('titular','ayudante') NOT NULL DEFAULT 'titular' COLLATE 'utf8mb4_general_ci',
+    PRIMARY KEY (profesor_id, materia_id) USING BTREE,
+    INDEX materia_id (materia_id) USING BTREE,
+    CONSTRAINT profesor_materia_ibfk_1 FOREIGN KEY (profesor_id) REFERENCES profesores (id) ON UPDATE RESTRICT ON DELETE CASCADE,
+    CONSTRAINT profesor_materia_ibfk_2 FOREIGN KEY (materia_id) REFERENCES materias (id) ON UPDATE RESTRICT ON DELETE CASCADE
 );
 
 CREATE TABLE mesas_examenes (
@@ -132,7 +130,7 @@ CREATE TABLE horarios_cursada (
     FOREIGN KEY (profesor_id) REFERENCES profesores(id) ON DELETE SET NULL
 );
 
-CREATE TABLE IF NOT EXISTS novedades (
+CREATE TABLE novedades (
     id INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(255) NOT NULL,
     descripcion_breve TEXT NULL,
@@ -169,7 +167,7 @@ CREATE TABLE documentos (
     FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE RESTRICT
 );
 
-CREATE TABLE IF NOT EXISTS bedeles (
+CREATE TABLE bedeles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(150) NOT NULL,
     anio_asignado ENUM('Primer Año', 'Segundo Año', 'Tercer Año') NOT NULL,
