@@ -54,8 +54,8 @@ CREATE TABLE etapas_ingreso (
     anio INT NOT NULL,
     nombre VARCHAR(255) NOT NULL,
     descripcion TEXT,
-    fecha_inicio DATE NOT NULL,
-    fecha_fin DATE NOT NULL,
+    fecha_inicio DATE NULL,
+    fecha_fin DATE NULL,
     requisitos TEXT,
     orden INT,
     activo BOOLEAN DEFAULT TRUE

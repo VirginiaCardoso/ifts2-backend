@@ -62,12 +62,8 @@ const validarEtapa = (datos) => {
     return 'El nombre de la etapa es obligatorio.';
   }
 
-  if (!fecha_inicio || !fecha_fin) {
-    return 'Las fechas de inicio y finalización son obligatorias.';
-  }
-
   const validarFecha = (valor) => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
+    if (typeof valor !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
       return false;
     }
 
@@ -79,11 +75,23 @@ const validarEtapa = (datos) => {
     );
   };
 
-  if (!validarFecha(fecha_inicio) || !validarFecha(fecha_fin)) {
+  const fechaInicioInformada = fecha_inicio !== undefined &&
+    fecha_inicio !== null && fecha_inicio !== '';
+  const fechaFinInformada = fecha_fin !== undefined &&
+    fecha_fin !== null && fecha_fin !== '';
+
+  if (
+    (fechaInicioInformada && !validarFecha(fecha_inicio)) ||
+    (fechaFinInformada && !validarFecha(fecha_fin))
+  ) {
     return 'Ingresá fechas válidas en formato AAAA-MM-DD.';
   }
 
-  if (fecha_fin < fecha_inicio) {
+  if (
+    fechaInicioInformada &&
+    fechaFinInformada &&
+    fecha_fin < fecha_inicio
+  ) {
     return 'La fecha de finalización no puede ser anterior a la de inicio.';
   }
 
@@ -134,8 +142,8 @@ const crearIngresante = async (req, res) => {
         Number(anio),
         nombre.trim(),
         descripcion?.trim() || null,
-        fecha_inicio,
-        fecha_fin,
+        fecha_inicio || null,
+        fecha_fin || null,
         requisitos?.trim() || null,
         orden === '' || orden === undefined || orden === null
           ? null
@@ -202,8 +210,8 @@ const actualizarIngresante = async (req, res) => {
         Number(anio),
         nombre.trim(),
         descripcion?.trim() || null,
-        fecha_inicio,
-        fecha_fin,
+        fecha_inicio || null,
+        fecha_fin || null,
         requisitos?.trim() || null,
         orden === '' || orden === undefined || orden === null
           ? null
