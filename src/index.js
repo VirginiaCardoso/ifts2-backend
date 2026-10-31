@@ -39,7 +39,11 @@ const { mesasRoutes, horariosRoutes } = require('./routes/gestion-academica-rout
 app.use('/api/mesas-examenes', mesasRoutes);
 app.use('/api/horarios-cursada', horariosRoutes);
 app.use('/api/enlaces-externos', enlacesExternos)
-
+app.use('/api/documentos', require('./routes/documentos-routes'));
+// Registrar las rutas de documentos
+app.use('/api/documentos', require('./routes/documentos-routes'));
+// Acceso público a los archivos subidos (ej: PDFs)
+app.use(express.static(path.join(__dirname, 'public')));
 //Ruta de contacto (formulario de contacto)
 app.use('/api/contacto', require('./routes/contacto-routes'))
 
