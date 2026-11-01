@@ -22,6 +22,13 @@ const app = express();
 // Middlewares
 app.use(cors()); // Permite que el repositorio Front-End se comunique con este Back-End
 app.use(express.json()); // Permite procesar datos en formato JSON
+app.use((req, res, next) => {
+    if (['POST', 'PUT', 'PATCH'].includes(req.method)) {
+        if (req.body === undefined) req.body = {};
+        if (req.body === null || Array.isArray(req.body) || typeof req.body !== 'object') return res.status(400).json({ error: 'Enviá un objeto con los datos del formulario.' });
+    }
+    next();
+});
 
 // Rutas de autenticación
 app.use('/api/auth', authRoutes);
@@ -52,6 +59,16 @@ app.get('/', (req, res) => {
     res.send('API del IFTS N°2 funcionando correctamente.');
 });
 
+
+// Evitar respuestas HTML o detalles internos ante errores de formato y de carga.
+app.use((err, req, res, next) => {
+    if (res.headersSent) return next(err);
+    if (err.type === 'entity.parse.failed') return res.status(400).json({ error: 'El JSON enviado no es válido. Revisá el formato de los datos.' });
+    if (err.type === 'entity.too.large' || err.code === 'LIMIT_FILE_SIZE') return res.status(413).json({ error: 'El archivo o los datos superan el tamaño permitido.' });
+    if (err.name === 'MulterError' || err.message === 'Solo se permiten archivos PDF.') return res.status(400).json({ error: 'Seleccioná un único archivo PDF de hasta 10 MB en el campo documento.' });
+    console.error('Error de la aplicación:', err);
+    res.status(500).json({ error: 'No se pudo completar la operación. Intentá nuevamente.' });
+});
 
 // Configuración del puerto
 const PORT = process.env.PORT || 3000;

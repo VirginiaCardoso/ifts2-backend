@@ -4,11 +4,12 @@ const pool = require('../config/db');
 const poolConection = pool.promisePool;
 
 const login = async (req, res) => {
-    const { correo, password } = req.body;
+    const { correo, password } = req.body || {};
+    if (typeof correo !== 'string' || !correo.trim() || typeof password !== 'string' || !password.trim()) return res.status(400).json({ error: 'Ingresá tu correo y contraseña.' });
 
     try {
         // Buscar al usuario por correo
-        const [users] = await poolConection.query('SELECT * FROM usuarios WHERE correo = ?', [correo]);
+        const [users] = await poolConection.query('SELECT * FROM usuarios WHERE correo = ?', [correo.trim().toLowerCase()]);
         if (users.length === 0) {
             return res.status(401).json({ error: 'Credenciales inválidas.' });
         }
@@ -60,12 +61,12 @@ const cambiarPassword = async (req, res) => {
     const { password_actual, nueva_password } = req.body;
 
     // Validaciones
-    if (!password_actual || !nueva_password) {
+    if (typeof password_actual !== 'string' || !password_actual.trim() || typeof nueva_password !== 'string' || !nueva_password.trim()) {
         return res.status(400).json({ error: 'Debes proporcionar la contraseña actual y la nueva contraseña.' });
     }
 
-    if (nueva_password.length < 8) {
-        return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres.' });
+    if (nueva_password.length < 8 || Buffer.byteLength(nueva_password, 'utf8') > 72) {
+        return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres y no superar 72 bytes.' });
     }
 
     try {

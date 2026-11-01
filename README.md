@@ -206,3 +206,8 @@ Consultá las guías enlazadas para formatos, validaciones, filtros, códigos de
 | `npm run seed:correlatividades -- --apply` | Aplica esa carga complementaria. |
 
 Los seeds complementarios están pensados para bases que ya tienen el esquema principal. Revisá [Carrera y plan de estudios](docs/carrera.md) antes de usarlos.
+
+
+### Validaciones y control de errores
+
+Reglas de duplicados, campos obligatorios, errores y guía de comprobación: [docs/validaciones.md](docs/validaciones.md). Esta actualización no requiere migraciones ni ejecutar seeds.

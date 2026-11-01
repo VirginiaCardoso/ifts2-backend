@@ -58,10 +58,13 @@ const validarEtapa = (datos) => {
     return 'Ingresá un año válido entre 2000 y 2100.';
   }
 
-  if (!nombre || !nombre.trim()) {
-    return 'El nombre de la etapa es obligatorio.';
+  if (typeof nombre !== 'string' || !nombre.trim() || nombre.trim().length > 255) {
+    return 'El nombre de la etapa es obligatorio y admite hasta 255 caracteres.';
   }
 
+  for (const campo of ['descripcion', 'requisitos']) {
+    if (datos[campo] != null && (typeof datos[campo] !== 'string' || Buffer.byteLength(datos[campo], 'utf8') > 65535)) return 'La descripción y los requisitos deben ser texto de hasta 65535 bytes.';
+  }
   const validarFecha = (valor) => {
     if (typeof valor !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(valor)) {
       return false;

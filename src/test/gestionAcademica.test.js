@@ -104,6 +104,11 @@ describe('Gestión Académica con MySQL', () => {
         expect((await request(app).get('/api/horarios-cursada?cuatrimestre=3')).status).toBe(400);
         expect((await request(app).get('/api/horarios-cursada?dia_semana=Domingo')).status).toBe(400);
     });
+    afterEach(async () => {
+        for (const id of mesas) await promisePool.query('DELETE FROM mesas_examenes WHERE id = ?', [id]);
+        for (const id of horarios) await promisePool.query('DELETE FROM horarios_cursada WHERE id = ?', [id]);
+        mesas.clear(); horarios.clear();
+    });
     test('protege las escrituras de ambos recursos', async () => {
         const sinRol = jwt.sign({ id: 1, nivel_de_acceso: 'Otro' }, process.env.JWT_SECRET, { expiresIn: '1m' });
         for (const ruta of ['mesas-examenes', 'horarios-cursada']) {

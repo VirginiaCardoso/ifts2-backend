@@ -7,6 +7,7 @@ function validar(body = {}) {
 
     if (!['Novedades', 'Eventos', 'Académico'].includes(etiqueta)) return 'Seleccioná una etiqueta válida.';
 
+    if (typeof descripcion_breve === 'string' && Buffer.byteLength(descripcion_breve, 'utf8') > 65535) return 'La descripción supera el tamaño permitido (65535 bytes).';
     if (descripcion_breve != null && typeof descripcion_breve !== 'string') return 'La descripción debe ser texto.';
 
     if (imagen_portada_url) {

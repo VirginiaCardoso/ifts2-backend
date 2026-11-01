@@ -4,6 +4,7 @@ const { dias, anioValido, parametroIdValido, normalizarHora, validarMesa, valida
 function fallo(status, message) { return Object.assign(new Error(message), { status }); }
 function responderError(res, error) {
     if (error.status) return res.status(error.status).json({ error: error.message });
+    if (['ER_LOCK_DEADLOCK', 'ER_LOCK_WAIT_TIMEOUT'].includes(error.code)) return res.status(409).json({ error: 'Los datos cambiaron durante el guardado. Recargá e intentá nuevamente.' });
     if (error.code === 'ER_NO_REFERENCED_ROW_2') return res.status(400).json({ error: 'La materia o un profesor indicado ya no existe.' });
     console.error('Error en Gestión Académica:', error);
     return res.status(500).json({ error: 'No se pudo completar la operación de Gestión Académica.' });
@@ -76,6 +77,8 @@ function crearControlador(mesa) {
         try {
             conn = await promisePool.getConnection();
             await conn.beginTransaction();
+            // Bloquear primero la materia serializa las altas/ediciones del mismo catálogo.
+            await conn.query('SELECT id FROM materias WHERE id = ? FOR UPDATE', [req.body.materia_id]);
             if (id) {
                 const [existentes] = await conn.query(`SELECT id FROM ${tabla} WHERE id = ? FOR UPDATE`, [Number(id)]);
                 if (!existentes.length) throw fallo(404, `${nombre} no encontrado/a.`);
@@ -84,6 +87,11 @@ function crearControlador(mesa) {
             await comprobarReferencias(conn, body.materia_id, mesa ? body.profesores_ids : (body.profesor_id == null ? [] : [body.profesor_id]));
             const columnas = mesa ? ['materia_id', 'periodo', 'fecha', 'hora', 'anio_vigencia'] : ['materia_id', 'profesor_id', 'dia_semana', 'hora_inicio', 'hora_fin', 'cuatrimestre', 'anio'];
             const valores = mesa ? [body.materia_id, body.periodo.trim(), body.fecha, normalizarHora(body.hora), body.anio_vigencia] : [body.materia_id, body.profesor_id ?? null, body.dia_semana, normalizarHora(body.hora_inicio), normalizarHora(body.hora_fin), body.cuatrimestre, body.anio];
+            const [duplicados] = await conn.query(
+                `SELECT id FROM ${tabla} WHERE ${columnas.map((c) => `${c} <=> ?`).join(' AND ')} AND id <> ? FOR UPDATE`,
+                [...valores, id ? Number(id) : 0]
+            );
+            if (duplicados.length) throw fallo(409, `Ya existe un registro idéntico de ${nombre.toLowerCase()}.`);
             const [result] = id
                 ? await conn.query(`UPDATE ${tabla} SET ${columnas.map((columna) => columna + ' = ?').join(', ')} WHERE id = ?`, [...valores, Number(id)])
                 : await conn.query(`INSERT INTO ${tabla} (${columnas.join(', ')}) VALUES (${columnas.map(() => '?').join(', ')})`, valores);
