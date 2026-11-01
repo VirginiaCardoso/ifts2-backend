@@ -15,74 +15,67 @@ const obtenerUsuarios = async (req, res) => {
     }
 };
 
+const idValido = (id) => /^[1-9]\d*$/.test(id || '') && Number(id) <= 2147483647;
+const roles = ['Administrador General', 'Gestión Académica'];
+function validarUsuario(body, crear = false) {
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return 'Los datos del usuario no son válidos.';
+    const tiene = (campo) => crear || Object.hasOwn(body, campo);
+    if (tiene('nombre_completo') && (typeof body.nombre_completo !== 'string' || !body.nombre_completo.trim() || body.nombre_completo.trim().length > 255)) return 'El nombre completo es obligatorio y admite hasta 255 caracteres.';
+    if (Object.hasOwn(body, 'rol_institucional') && (typeof body.rol_institucional !== 'string' || !body.rol_institucional.trim() || body.rol_institucional.trim().length > 255)) return 'El rol institucional no puede estar vacío y admite hasta 255 caracteres.';
+    if (tiene('nivel_de_acceso') && !roles.includes(body.nivel_de_acceso)) return 'Seleccioná un nivel de acceso válido.';
+    if (tiene('correo') && (typeof body.correo !== 'string' || body.correo.trim().length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.correo.trim()))) return 'Ingresá un correo electrónico válido.';
+    if (tiene('password') && (typeof body.password !== 'string' || !body.password.trim() || body.password.length < 8 || Buffer.byteLength(body.password, 'utf8') > 72)) return 'La contraseña debe tener al menos 8 caracteres y no superar 72 bytes.';
+    if (!crear && !['nombre_completo', 'rol_institucional', 'nivel_de_acceso', 'correo', 'password'].some((c) => Object.hasOwn(body, c))) return 'Indicá al menos un dato para actualizar.';
+    return null;
+}
+function errorUsuario(res, error) {
+    if (error.code === 'ER_DUP_ENTRY') return res.status(409).json({ error: 'El correo ya está registrado.' });
+    console.error('Error al guardar usuario:', error);
+    return res.status(500).json({ error: 'No se pudo guardar el usuario. Intentá nuevamente.' });
+}
 const crearUsuario = async (req, res) => {
-    const { nombre_completo, rol_institucional, nivel_de_acceso, correo, password } = req.body;
-
+    const validacion = validarUsuario(req.body, true);
+    if (validacion) return res.status(400).json({ error: validacion });
+    const { nombre_completo, rol_institucional, nivel_de_acceso, password } = req.body;
+    const correo = req.body.correo.trim().toLowerCase();
     try {
-        // Verificar si el usuario ya existe
-        const [existingUser] = await poolConection.query('SELECT id FROM usuarios WHERE correo = ?', [correo]);
-        if (existingUser.length > 0) {
-            return res.status(400).json({ error: 'El correo ya está registrado.' });
-        }
-
-        // Encriptar la contraseña
-        const salt = await bcrypt.genSalt(10);
-        const password_hash = await bcrypt.hash(password, salt);
-
-        // Insertar el nuevo usuario
+        const [existentes] = await poolConection.query('SELECT id FROM usuarios WHERE LOWER(TRIM(correo)) = ?', [correo]);
+        if (existentes.length) return res.status(409).json({ error: 'El correo ya está registrado.' });
+        const password_hash = await bcrypt.hash(password, 10);
         const [result] = await poolConection.query(
-            `INSERT INTO usuarios (nombre_completo, rol_institucional, nivel_de_acceso, correo, password_hash) 
-             VALUES (?, ?, ?, ?, ?)`,
-            [nombre_completo, rol_institucional, nivel_de_acceso, correo, password_hash]
+            'INSERT INTO usuarios (nombre_completo, rol_institucional, nivel_de_acceso, correo, password_hash) VALUES (?, ?, ?, ?, ?)',
+            [nombre_completo.trim(), rol_institucional?.trim() || null, nivel_de_acceso, correo, password_hash]
         );
-
-        res.status(201).json({
-            mensaje: 'Usuario creado exitosamente',
-            usuarioId: result.insertId
-        });
-
-    } catch (error) {
-        console.error('Error al crear usuario:', error);
-        res.status(500).json({ error: 'Error al registrar el usuario.' });
-    }
+        res.status(201).json({ mensaje: 'Usuario creado exitosamente', usuarioId: result.insertId });
+    } catch (error) { errorUsuario(res, error); }
 };
-
 const actualizarUsuario = async (req, res) => {
     const { id } = req.params;
-    const { nombre_completo, rol_institucional, nivel_de_acceso, correo, password } = req.body;
-
+    if (!idValido(id)) return res.status(400).json({ error: 'ID de usuario inválido.' });
+    const validacion = validarUsuario(req.body);
+    if (validacion) return res.status(400).json({ error: validacion });
     try {
-        // Verificar si el usuario existe
-        const [user] = await poolConection.query('SELECT id FROM usuarios WHERE id = ?', [id]);
-        if (user.length === 0) {
-            return res.status(404).json({ error: 'Usuario no encontrado.' });
+        const [usuarios] = await poolConection.query('SELECT id FROM usuarios WHERE id = ?', [id]);
+        if (!usuarios.length) return res.status(404).json({ error: 'Usuario no encontrado.' });
+        const datos = {};
+        for (const campo of ['nombre_completo', 'rol_institucional', 'nivel_de_acceso', 'correo']) {
+            if (Object.hasOwn(req.body, campo)) datos[campo] = req.body[campo].trim();
         }
-
-        // Si se envía una nueva contraseña se actualiza
-        if (password) {
-            const salt = await bcrypt.genSalt(10);
-            const password_hash = await bcrypt.hash(password, salt);
-            await poolConection.query(
-                `UPDATE usuarios SET nombre_completo=?, rol_institucional=?, nivel_de_acceso=?, correo=?, password_hash=? WHERE id=?`,
-                [nombre_completo, rol_institucional, nivel_de_acceso, correo, password_hash, id]
-            );
-        } else {
-            // Si no se envía contraseña, actualizamos los demás datos
-            await poolConection.query(
-                `UPDATE usuarios SET nombre_completo=?, rol_institucional=?, nivel_de_acceso=?, correo=? WHERE id=?`,
-                [nombre_completo, rol_institucional, nivel_de_acceso, correo, id]
-            );
+        if (datos.correo !== undefined) {
+            datos.correo = datos.correo.toLowerCase();
+            const [existentes] = await poolConection.query('SELECT id FROM usuarios WHERE LOWER(TRIM(correo)) = ? AND id <> ?', [datos.correo, id]);
+            if (existentes.length) return res.status(409).json({ error: 'El correo ya está registrado.' });
         }
-
+        if (req.body.password !== undefined) datos.password_hash = await bcrypt.hash(req.body.password, 10);
+        // Solo actualizar los campos informados: los omitidos conservan su valor.
+        await poolConection.query(`UPDATE usuarios SET ${Object.keys(datos).map((c) => `${c} = ?`).join(', ')} WHERE id = ?`, [...Object.values(datos), id]);
         res.json({ mensaje: 'Usuario actualizado exitosamente' });
-    } catch (error) {
-        console.error('Error al actualizar usuario:', error);
-        res.status(500).json({ error: 'Error interno del servidor al actualizar usuario' });
-    }
+    } catch (error) { errorUsuario(res, error); }
 };
 
 const eliminarUsuario = async (req, res) => {
     const { id } = req.params;
+    if (!idValido(id)) return res.status(400).json({ error: 'ID de usuario inválido.' });
 
     try {
         // Evitar que el administrador se elimine a sí mismo por error
@@ -108,11 +101,12 @@ const eliminarUsuario = async (req, res) => {
 
 const cambiarPasswordUsuario = async (req, res) => {
     const { id } = req.params;
+    if (!idValido(id)) return res.status(400).json({ error: 'ID de usuario inválido.' });
     const { password } = req.body;
 
     try {
-        if (!password || password.length < 8) {
-            return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres.' });
+        if (typeof password !== 'string' || !password.trim() || password.length < 8 || Buffer.byteLength(password, 'utf8') > 72) {
+            return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres y no superar 72 bytes.' });
         }
 
         // Verificar si el usuario existe

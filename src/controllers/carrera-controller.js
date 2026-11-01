@@ -200,6 +200,12 @@ const guardarMateria = manejar(async (req, res) => {
   const materiaId = await transaccion(async (conn) => {
     await bloquearMaterias(conn);
     if (id) await exigirMateria(conn, id);
+    const [duplicadas] = await conn.query(
+      `SELECT id FROM materias WHERE LOWER(TRIM(nombre)) = LOWER(?) AND anio_carrera = ?
+       AND es_anual = ? AND cuatrimestre <=> ? AND id <> ? FOR UPDATE`,
+      [body.nombre.trim(), String(body.anio_carrera), body.es_anual ?? false, body.cuatrimestre, id || 0],
+    );
+    if (duplicadas.length) throw error(409, 'Ya existe una materia con ese nombre en el mismo año y cuatrimestre.');
     const valores = [
       body.nombre.trim(),
       String(body.anio_carrera),

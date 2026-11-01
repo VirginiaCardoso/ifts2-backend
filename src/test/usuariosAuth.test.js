@@ -17,7 +17,7 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
         rol_institucional: 'Docente',
         nivel_de_acceso: 'Administrador General',
         correo: 'test@ifts2.edu.ar',
-        password: '123'
+        password: '12345678'
     };
 
     // Test de login para ambos roles
@@ -127,7 +127,7 @@ describe('Test de Autenticación y CRUD de Usuarios', () => {
                 .send({
                     nombre_completo: 'Usuario Test Password',
                     rol_institucional: 'Docente',
-                    nivel_de_acceso: 'General',
+                    nivel_de_acceso: 'Administrador General',
                     correo: credencialesPrueba.correo,
                     password: credencialesPrueba.password
                 });

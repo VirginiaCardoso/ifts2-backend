@@ -18,6 +18,13 @@ async function actualizarEnlace(req, res) {
         return res.status(400).json({ error: 'La URL de destino es obligatoria.' });
     }
 
+    if (!/^[1-9]\d*$/.test(id) || Number(id) > 2147483647) return res.status(400).json({ error: 'ID de enlace inválido.' });
+    try {
+        const url = new URL(url_destino.trim());
+        if (!['http:', 'https:'].includes(url.protocol) || url_destino.trim().length > 255) throw new Error();
+    } catch {
+        return res.status(400).json({ error: 'Ingresá una URL HTTP o HTTPS válida de hasta 255 caracteres.' });
+    }
     try {
         const [result] = await promisePool.query(
             'UPDATE enlaces_externos SET url_destino = ? WHERE id = ?',

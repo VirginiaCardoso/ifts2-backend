@@ -71,83 +71,61 @@ async function obtenerProfesores(req, res) {
         res.json(id ? formatear(rows[0]) : rows.map(formatear));
     } catch (error) {
         console.error('Error detallado al consultar profesores:', error);
-        res.status(500).json({ error: 'No se pudieron consultar los profesores.', detalle: error.message });
+        res.status(500).json({ error: 'No se pudieron consultar los profesores.' });
     }
 }
 
-async function crearProfesor(req, res) {
-    const errorValidacion = validarNombre(req.body);
-    if (errorValidacion) return res.status(400).json({ error: errorValidacion });
-
-    // Desestructuramos del body:
-    const { nombre_completo, materias = [], rol = 'titular' } = req.body;
-
-    try {
-        const [result] = await promisePool.query(
-            'INSERT INTO profesores (nombre_completo) VALUES (?)',
-            [nombre_completo.trim()]
-        );
-        const profesorId = result.insertId;
-
-        // Si se seleccionaron materias las vinculamos en profesores_materia (plural)
-        if (Array.isArray(materias) && materias.length > 0) {
-            const values = materias.map((materiaId) => [profesorId, Number(materiaId), rol]);
-            await promisePool.query(
-                'INSERT INTO profesor_materia (profesor_id, materia_id, rol) VALUES ?',
-                [values]
-            );
-        }
-
-        res.status(201).json({ mensaje: 'Profesor creado con éxito.', profesorId });
-    } catch (error) {
-        console.error('Error al crear profesor:', error);
-        res.status(500).json({ error: 'No se pudo crear el profesor.' });
-    }
+function validarAsignaciones(body) {
+    if (body.rol !== undefined && !['titular', 'ayudante'].includes(body.rol)) return 'Seleccioná un rol de docente válido.';
+    if (body.materias !== undefined && (!Array.isArray(body.materias) || !body.materias.every((n) => Number.isInteger(n) && n > 0 && n <= 2147483647) || new Set(body.materias).size !== body.materias.length)) return 'Seleccioná materias válidas, sin repetidos.';
+    return null;
 }
-
-async function actualizarProfesor(req, res) {
+async function guardarProfesor(req, res, editar) {
     const { id } = req.params;
-    if (!idValido(id)) return res.status(400).json({ error: 'ID inválido.' });
-
-    const errorValidacion = validarNombre(req.body);
+    if (editar && !idValido(id)) return res.status(400).json({ error: 'ID inválido.' });
+    const errorValidacion = validarNombre(req.body) || validarAsignaciones(req.body);
     if (errorValidacion) return res.status(400).json({ error: errorValidacion });
-
     const { nombre_completo, materias, rol = 'titular' } = req.body;
-
+    let conn;
     try {
-        const [result] = await promisePool.query(
-            'UPDATE profesores SET nombre_completo = ? WHERE id = ?',
-            [nombre_completo.trim(), id]
-        );
-
-        if (!result.affectedRows) {
-            return res.status(404).json({ error: 'Profesor no encontrado.' });
-        }
-
-        // Si se envía el arreglo de materias, se limpia y se reinserta en profesores_materia
-        if (Array.isArray(materias)) {
-            await promisePool.query('DELETE FROM profesor_materia WHERE profesor_id = ?', [id]);
-            if (materias.length > 0) {
-                const values = materias.map((materiaId) => [id, Number(materiaId), rol]);
-                await promisePool.query(
-                    'INSERT INTO profesor_materia (profesor_id, materia_id, rol) VALUES ?',
-                    [values]
-                );
+        conn = await promisePool.getConnection();
+        await conn.beginTransaction();
+        if (materias?.length) {
+            const [existentes] = await conn.query('SELECT id FROM materias WHERE id IN (?) FOR UPDATE', [materias]);
+            if (existentes.length !== materias.length) {
+                const error = new Error('Una de las materias seleccionadas no existe.');
+                error.status = 400;
+                throw error;
             }
         }
-
-        res.json({ mensaje: 'Profesor actualizado con éxito.', profesorId: Number(id) });
+        const [result] = editar
+            ? await conn.query('UPDATE profesores SET nombre_completo = ? WHERE id = ?', [nombre_completo.trim(), id])
+            : await conn.query('INSERT INTO profesores (nombre_completo) VALUES (?)', [nombre_completo.trim()]);
+        if (editar && !result.affectedRows) {
+            const error = new Error('Profesor no encontrado.'); error.status = 404; throw error;
+        }
+        const profesorId = editar ? Number(id) : result.insertId;
+        if (materias !== undefined) {
+            if (editar) await conn.query('DELETE FROM profesor_materia WHERE profesor_id = ?', [profesorId]);
+            if (materias.length) await conn.query('INSERT INTO profesor_materia (profesor_id, materia_id, rol) VALUES ?', [materias.map((n) => [profesorId, n, rol])]);
+        }
+        await conn.commit();
+        res.status(editar ? 200 : 201).json({ mensaje: editar ? 'Profesor actualizado con éxito.' : 'Profesor creado con éxito.', profesorId });
     } catch (error) {
-        console.error('Error al actualizar profesor:', error);
-        res.status(500).json({ error: 'No se pudo actualizar el profesor.' });
-    }
+        if (conn) await conn.rollback();
+        if (error.status) return res.status(error.status).json({ error: error.message });
+        if (['ER_NO_REFERENCED_ROW_2', 'ER_LOCK_DEADLOCK', 'ER_LOCK_WAIT_TIMEOUT'].includes(error.code)) return res.status(409).json({ error: 'Las materias relacionadas cambiaron. Recargá e intentá nuevamente.' });
+        console.error('Error al guardar profesor:', error);
+        res.status(500).json({ error: 'No se pudo guardar el profesor. No se aplicaron cambios parciales.' });
+    } finally { if (conn) conn.release(); }
 }
+const crearProfesor = (req, res) => guardarProfesor(req, res, false);
+const actualizarProfesor = (req, res) => guardarProfesor(req, res, true);
 
 async function eliminarProfesor(req, res) {
     const { id } = req.params;
     if (!idValido(id)) return res.status(400).json({ error: 'ID inválido.' });
     try {
-        await promisePool.query('DELETE FROM profesor_materia WHERE profesor_id = ?', [id]);
         const [result] = await promisePool.query('DELETE FROM profesores WHERE id = ?', [id]);
 
         if (!result.affectedRows) {

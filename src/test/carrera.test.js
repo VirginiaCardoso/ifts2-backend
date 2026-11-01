@@ -548,6 +548,91 @@ describe("Carrera en base temporal aislada", () => {
       (await request(app).delete(`/api/materias/${id}`).set(auth())).status,
     ).toBe(200);
   });
+  test("rechaza materias duplicadas, admite reedición propia y otro cuatrimestre", async () => {
+    const body = nueva('Duplicado controlado');
+    const id = await crear(body);
+    const duplicada = await request(app).post('/api/materias').set(auth()).send({ ...body, nombre: '  DUPLICADO CONTROLADO  ' });
+    expect(duplicada.status).toBe(409);
+    expect(duplicada.body.error).toMatch(/Ya existe/);
+    expect((await request(app).put(`/api/materias/${id}`).set(auth()).send(body)).status).toBe(200);
+    await crear({ ...body, cuatrimestre: 2 });
+    const resultados = await Promise.all([1, 2].map(() => request(app).post('/api/materias').set(auth()).send(nueva('Alta simultánea'))));
+    expect(resultados.map((r) => r.status).sort()).toEqual([201, 409]);
+  });
+  test.each(['mesas-examenes', 'horarios-cursada'])('evita duplicados al crear y editar %s, incluso en paralelo', async (ruta) => {
+    const body = ruta === 'mesas-examenes'
+      ? { materia_id: materias[0], periodo: 'Prueba duplicados', fecha: '2099-03-01', hora: '18:00', anio_vigencia: 2099, profesores_ids: [profesor1] }
+      : { materia_id: materias[0], profesor_id: null, dia_semana: 'Lunes', hora_inicio: '18:00', hora_fin: '20:00', cuatrimestre: 1, anio: 2099 };
+    const resultados = await Promise.all([1, 2].map(() => request(app).post(`/api/${ruta}`).set(auth()).send(body)));
+    expect(resultados.map((r) => r.status).sort()).toEqual([201, 409]);
+    const creado = resultados.find((r) => r.status === 201);
+    const id = creado.body.mesaId || creado.body.horarioId;
+    expect((await request(app).put(`/api/${ruta}/${id}`).set(auth()).send(body)).status).toBe(200);
+    const otro = await request(app).post(`/api/${ruta}`).set(auth()).send(ruta === 'mesas-examenes' ? { ...body, periodo: 'Otro período' } : { ...body, dia_semana: 'Martes' });
+    expect(otro.status).toBe(201);
+    const otroId = otro.body.mesaId || otro.body.horarioId;
+    expect((await request(app).put(`/api/${ruta}/${otroId}`).set(auth()).send(body)).status).toBe(409);
+    const lectura = (await request(app).get(`/api/${ruta}/${otroId}`)).body;
+    expect(ruta === 'mesas-examenes' ? lectura.periodo : lectura.dia_semana).toBe(ruta === 'mesas-examenes' ? 'Otro período' : 'Martes');
+  });
+  test("valida usuarios, normaliza correo y conserva campos omitidos al editar", async () => {
+    const body = { nombre_completo: 'Usuario válido', rol_institucional: 'Docente', nivel_de_acceso: 'Gestión Académica', correo: 'validacion@prueba.invalid', password: 'Valida1234' };
+    for (const cambio of [{ nombre_completo: '  ' }, { correo: 'sin-correo' }, { nivel_de_acceso: 'General' }, { password: '123' }, { password: ' '.repeat(8) }]) {
+      expect((await request(app).post('/api/usuarios').set(auth()).send({ ...body, ...cambio })).status).toBe(400);
+    }
+    const usuario = await request(app).post('/api/usuarios').set(auth()).send(body);
+    expect(usuario.status).toBe(201);
+    const id = usuario.body.usuarioId;
+    expect((await request(app).post('/api/usuarios').set(auth()).send({ ...body, correo: '  VALIDACION@PRUEBA.INVALID ' })).status).toBe(409);
+    expect((await request(app).put(`/api/usuarios/${id}`).set(auth()).send({ nombre_completo: 'Editado' })).status).toBe(200);
+    const [guardado] = await db.query('SELECT nombre_completo, correo, nivel_de_acceso FROM usuarios WHERE id = ?', [id]);
+    expect(guardado[0]).toEqual({ nombre_completo: 'Editado', correo: body.correo, nivel_de_acceso: body.nivel_de_acceso });
+    expect((await request(app).put(`/api/usuarios/${id}`).set(auth()).send({ correo: 'admin@prueba.invalid' })).status).toBe(409);
+    expect((await request(app).put(`/api/usuarios/${id}`).set(auth()).send({ nombre_completo: '  ' })).status).toBe(400);
+    expect((await request(app).put(`/api/usuarios/${id}`).set(auth()).send({ password: 12345678 })).status).toBe(400);
+    const [final] = await db.query('SELECT correo FROM usuarios WHERE id = ?', [id]);
+    expect(final[0].correo).toBe(body.correo);
+  });
+  test("rechaza campos vacíos o tipos inválidos en todo el panel y JSON mal formado", async () => {
+    for (const [ruta, body] of [
+      ['/profesores', { nombre_completo: '  ' }],
+      ['/bedeles', { nombre: ' ', anio_asignado: 'Primer Año' }],
+      ['/autoridades', { cargo: ' ', nombre_responsable: 'Persona' }],
+      ['/tramites', { nombre_tramite: ' ' }],
+      ['/novedades', { titulo: ' ', etiqueta: 'Novedades' }],
+      ['/ingresantes', { nombre: 123, anio: 2027 }],
+      ['/ingresantes', { nombre: 'Etapa', anio: 2027, descripcion: [] }],
+    ]) {
+      const res = await request(app).post(`/api${ruta}`).set(auth()).send(body);
+      expect(res.status).toBe(400);
+      expect(res.body.error || res.body.mensaje).toEqual(expect.any(String));
+    }
+    expect((await request(app).put('/api/enlaces-externos/1').set(auth()).send({ url_destino: 'javascript:alert(1)' })).status).toBe(400);
+    const malformado = await request(app).post('/api/usuarios').set(auth()).set('Content-Type', 'application/json').send('{ roto');
+    expect(malformado.status).toBe(400);
+    expect(malformado.body.error).toMatch(/JSON/);
+    expect((await request(app).post('/api/usuarios').set(auth()).send([])).status).toBe(400);
+    const archivo = await request(app).post('/api/documentos/ingresantes').set(auth()).attach('documento', Buffer.from('No es PDF'), { filename: 'prueba.txt', contentType: 'text/plain' });
+    expect(archivo.status).toBe(400);
+    expect(archivo.body.error).toMatch(/PDF/);
+  });
+  test("no deja modificaciones parciales al fallar las asociaciones de Plantel", async () => {
+    const conn = await db.getConnection();
+    const original = conn.query.bind(conn);
+    const consulta = jest.spyOn(conn, 'query').mockImplementation((sql, valores) => {
+      if (sql.startsWith('INSERT INTO profesor_materia')) return Promise.reject(new Error('Falla simulada'));
+      return original(sql, valores);
+    });
+    const conexion = jest.spyOn(db, 'getConnection').mockResolvedValueOnce(conn);
+    const log = jest.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const res = await request(app).put(`/api/profesores/${profesor1}`).set(auth()).send({ nombre_completo: 'No debe persistir', materias: [materias[0]], rol: 'titular' });
+      expect(res.status).toBe(500);
+    } finally { consulta.mockRestore(); conexion.mockRestore(); log.mockRestore(); }
+    const [rows] = await db.query('SELECT nombre_completo FROM profesores WHERE id = ?', [profesor1]);
+    expect(rows[0].nombre_completo).not.toBe('No debe persistir');
+    expect((await request(app).post('/api/profesores').set(auth()).send({ nombre_completo: 'Válido', materias: [materias[0], materias[0]] })).status).toBe(400);
+  });
   test("el seed migra una base previa, preserva relaciones y puede repetirse sin duplicar", async () => {
     const { cargar, planificar } = require("../database/seed-carrera");
     const { materias: oficiales } = require("../database/carrera-data");
