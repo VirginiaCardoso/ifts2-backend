@@ -15,50 +15,59 @@ const obtenerDocumentoIngresantes = async (req, res) => {
     }
 };
 
-const subirDocumentoIngresantes = async (req, res) => {
+// La limpieza no cambia el resultado de una escritura ya confirmada en la base.
+const limpiarPdf = async (url) => {
+    if (!url || !url.startsWith('/uploads/documentos/') ||
+        path.posix.basename(url) !== url.slice('/uploads/documentos/'.length)) return;
     try {
-        if (!req.file) {
-            return res.status(400).json({ mensaje: 'No se adjuntó ningún archivo PDF.' });
-        }
+        await fs.promises.unlink(path.join(__dirname, '../public', url));
+    } catch (error) {
+        if (error.code !== 'ENOENT') console.error('No se pudo limpiar el PDF:', error);
+    }
+};
 
-        const url_archivo = `/uploads/documentos/${req.file.filename}`;
-        const nombre = req.file.originalname;
-        const usuario_id = req.usuario ? req.usuario.id : null;
+const subirDocumentoIngresantes = async (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ mensaje: 'No se adjuntó ningún archivo PDF.' });
+    }
 
-        // Buscamos si ya existe un documento de ingresantes
+    const url_archivo = `/uploads/documentos/${req.file.filename}`;
+    const nombre = req.file.originalname;
+    const usuario_id = req.usuario ? req.usuario.id : null;
+    let anterior;
+    try {
         const [existente] = await promisePool.execute(
-            "SELECT id, url_archivo FROM documentos WHERE tipo = 'ingresantes'"
+            "SELECT id, url_archivo FROM documentos WHERE tipo = 'ingresantes' ORDER BY id DESC LIMIT 1"
         );
 
         if (existente.length > 0) {
-            // Eliminamos el archivo físico anterior para no ocupar espacio basura
-            const oldPath = path.join(__dirname, '../public', existente[0].url_archivo);
-            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-
-            // Actualizamos el registro existente en la base de datos
+            anterior = existente[0].url_archivo;
             await promisePool.execute(
-                `UPDATE documentos 
-         SET nombre = ?, url_archivo = ?, updated_at = CURRENT_TIMESTAMP, usuario_id = ? 
-         WHERE id = ?`,
+                `UPDATE documentos
+                 SET nombre = ?, url_archivo = ?, updated_at = CURRENT_TIMESTAMP, usuario_id = ?
+                 WHERE id = ?`,
                 [nombre, url_archivo, usuario_id, existente[0].id]
             );
         } else {
-            // Insertamos uno nuevo si no existía
             await promisePool.execute(
-                `INSERT INTO documentos (nombre, tipo, descripcion, url_archivo, activo, usuario_id) 
-         VALUES (?, 'ingresantes', 'Información para aspirantes', ?, 1, ?)`,
+                `INSERT INTO documentos (nombre, tipo, descripcion, url_archivo, activo, usuario_id)
+                 VALUES (?, 'ingresantes', 'Información para aspirantes', ?, 1, ?)`,
                 [nombre, url_archivo, usuario_id]
             );
         }
-
-        res.status(200).json({
-            mensaje: 'PDF actualizado correctamente',
-            documento: { nombre, url_archivo }
-        });
     } catch (error) {
+        // La escritura falló: conservar el anterior y quitar solamente la nueva carga.
+        await limpiarPdf(url_archivo);
         console.error('Error al subir PDF:', error);
-        res.status(500).json({ mensaje: 'Error interno al guardar el archivo.' });
+        return res.status(500).json({ mensaje: 'Error interno al guardar el archivo.' });
     }
+
+    // execute usa autocommit: recién ahora se puede retirar el archivo anterior.
+    if (anterior !== url_archivo) await limpiarPdf(anterior);
+    return res.status(200).json({
+        mensaje: 'PDF actualizado correctamente',
+        documento: { nombre, url_archivo }
+    });
 };
 
 const descargarDocumentoIngresantes = async (req, res) => {
