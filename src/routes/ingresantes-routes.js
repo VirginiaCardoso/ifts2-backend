@@ -20,7 +20,7 @@ router.get('/:id', obtenerIngresantes);
 // Proteger las operaciones de escritura
 router.use(
   verificarToken,
-  verificarRol(['Administrador General', 'Gestión Académica'])
+  verificarRol(['Administrador General'])
 );
 
 router.post('/', crearIngresante);
