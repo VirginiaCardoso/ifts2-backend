@@ -1,129 +1,356 @@
-USE sistema_academico;
+-- Volcando datos para la tabla sistema_academico.autoridades: ~5 rows (aproximadamente)
+INSERT INTO `autoridades` (`id`, `cargo`, `nombre_responsable`, `created_at`, `updated_at`) VALUES
+	(1, 'Rectora', 'Prof. Alicia E. Ruidiaz', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(2, 'Secretario Académico', 'Lic. Leonardo Bermudez', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(3, 'Secretaria Administrativa', 'Prof. María Belén Orellano Camu', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(4, 'Jefatura de Trabajos Prácticos', 'Prof. Pedro Perez', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(5, 'Tutor', 'Prof. Axel Trebino', '2026-11-02 20:03:42', '2026-11-02 20:03:42');
 
--- 1. Insertar Usuarios
+-- Volcando datos para la tabla sistema_academico.bedeles: ~6 rows (aproximadamente)
+INSERT INTO `bedeles` (`id`, `nombre`, `anio_asignado`, `created_at`, `updated_at`) VALUES
+	(1, 'Sra. Andrea Barrios', 'Primer Año', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(2, 'Sra. Verónica Alarcón', 'Segundo Año', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(3, 'Sr. Esteban Suárez', 'Tercer Año', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(4, 'Sra. Andrea Barrios', 'Primer Año', '2026-11-02 20:04:24', '2026-11-02 20:04:24'),
+	(5, 'Sra. Verónica Alarcón', 'Segundo Año', '2026-11-02 20:04:24', '2026-11-02 20:04:24'),
+	(6, 'Sr. Esteban Suárez', 'Tercer Año', '2026-11-02 20:04:24', '2026-11-02 20:04:24');
+
+-- Volcando datos para la tabla sistema_academico.configuracion_institucional: ~4 rows (aproximadamente)
+INSERT INTO `configuracion_institucional` (`id`, `clave`, `valor_texto`, `valor_url_archivo`, `created_at`, `updated_at`) VALUES
+	(1, 'carrera.pdf.resolucion', '{"nombre":"res_megc_1202_07a.pdf","archivo":"945e9610-45e3-472b-9cb8-525144509bd5.pdf"}', '/api/carrera/documentos/resolucion/archivo', '2026-11-02 21:16:04', '2026-11-02 21:16:04'),
+	(2, 'carrera.pdf.promocionables', '{"nombre":"Materias promocionables por año y cuatrimestre.pdf","archivo":"e1643363-9f7f-4cef-a972-626b4da41247.pdf"}', '/api/carrera/documentos/promocionables/archivo', '2026-11-02 21:16:13', '2026-11-02 21:16:13'),
+	(3, 'carrera.pdf.correlatividades', '{"nombre":"correlatividades.pdf","archivo":"f651a49b-9c6f-4ad6-b3b4-93c616326b67.pdf"}', '/api/carrera/documentos/correlatividades/archivo', '2026-11-02 21:16:18', '2026-11-02 21:16:18'),
+	(4, 'carrera.correlatividades.nota', 'Criterio simplificado: Cursada agrupa cursada aprobada y requisitos en curso; Aprobada exige la materia aprobada. La resolución contempla además hasta un 25% en curso simultáneo para Práctica Profesional N°3. Esa condición se conserva como referencia, sin evaluación automática.', NULL, '2026-11-02 21:22:49', '2026-11-02 21:22:49');
+
+-- Volcando datos para la tabla sistema_academico.correlatividades: ~26 rows (aproximadamente)
+INSERT INTO `correlatividades` (`id`, `materia_id`, `materia_requisito_id`, `tipo_requisito`) VALUES
+	(4, 5, 4, 'APROBADA'),
+	(5, 9, 8, 'CURSADA'),
+	(6, 13, 4, 'APROBADA'),
+	(7, 13, 5, 'APROBADA'),
+	(8, 14, 4, 'CURSADA'),
+	(9, 14, 5, 'CURSADA'),
+	(10, 15, 11, 'APROBADA'),
+	(11, 16, 15, 'CURSADA'),
+	(12, 4, 1, 'CURSADA'),
+	(13, 4, 2, 'CURSADA'),
+	(14, 4, 3, 'CURSADA'),
+	(15, 31, 40, 'APROBADA'),
+	(16, 38, 7, 'CURSADA'),
+	(17, 25, 6, 'APROBADA'),
+	(18, 25, 22, 'APROBADA'),
+	(19, 20, 18, 'APROBADA'),
+	(20, 12, 13, 'CURSADA'),
+	(21, 12, 11, 'CURSADA'),
+	(22, 12, 20, 'APROBADA'),
+	(23, 12, 4, 'APROBADA'),
+	(24, 12, 5, 'APROBADA'),
+	(25, 39, 25, 'APROBADA'),
+	(26, 39, 27, 'APROBADA'),
+	(27, 39, 12, 'APROBADA'),
+	(28, 39, 20, 'APROBADA'),
+	(29, 39, 15, 'APROBADA');
+
+-- Volcando datos para la tabla sistema_academico.documentos: ~0 rows (aproximadamente)
+INSERT INTO `documentos` (`id`, `nombre`, `tipo`, `descripcion`, `url_archivo`, `activo`, `usuario_id`, `created_at`, `updated_at`) VALUES
+	(1, 'Preingreso - Primer Cuatrimestre.pdf', 'ingresantes', 'Información para aspirantes', '/uploads/documentos/ingresantes-1793656172785-198593806.pdf', 1, 3, '2026-11-02 21:49:32', '2026-11-02 21:49:32');
+
+-- Volcando datos para la tabla sistema_academico.enlaces_externos: ~4 rows (aproximadamente)
+INSERT INTO `enlaces_externos` (`id`, `nombre_sistema`, `url_destino`, `created_at`, `updated_at`) VALUES
+	(1, 'SIU Guaraní', 'https://guarani-gestionagencia.bue.edu.ar/', '2026-11-02 21:22:49', '2026-11-02 21:30:41'),
+	(2, 'Moodle / Aulas Virtuales', 'https://aulasvirtuales.bue.edu.ar/', '2026-11-02 21:22:49', '2026-11-02 21:22:49'),
+	(3, 'Becas PROGRESAR', 'https://www.argentina.gob.ar/educacion/progresar', '2026-11-02 21:22:49', '2026-11-02 21:22:49'),
+	(4, 'Mi Argentina', 'https://www.argentina.gob.ar/miargentina', '2026-11-02 21:22:49', '2026-11-02 21:31:14');
+
+-- Volcando datos para la tabla sistema_academico.etapas_ingreso: ~2 rows (aproximadamente)
+INSERT INTO `etapas_ingreso` (`id_etapa`, `anio`, `nombre`, `descripcion`, `fecha_inicio`, `fecha_fin`, `requisitos`, `orden`, `activo`) VALUES
+	(1, 2027, 'Período de pre-inscripción y carga de documentación', 'Los aspirantes a la carrera completan el formulario de pre-inscripción en línea y adjuntan la documentación requerida.', NULL, NULL, NULL, 1, 1),
+	(2, 2027, 'Curso de preingreso', 'Jornadas de introducción a la carrera, metodología de estudio y presentación institucional.', NULL, NULL, NULL, 2, 1);
+
+-- Volcando datos para la tabla sistema_academico.horarios_cursada: ~41 rows (aproximadamente)
+INSERT INTO `horarios_cursada` (`id`, `dia_semana`, `hora_inicio`, `hora_fin`, `cuatrimestre`, `anio`, `materia_id`, `profesor_id`, `created_at`, `updated_at`) VALUES
+	(1, 'Lunes', '18:00:00', '20:00:00', 2, 2026, 2, 1, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(2, 'Lunes', '20:15:00', '22:15:00', 2, 2026, 7, 2, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(3, 'Martes', '18:00:00', '20:00:00', 2, 2026, 6, 1, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(4, 'Martes', '20:15:00', '22:15:00', 2, 2026, 5, 5, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(5, 'Miércoles', '18:00:00', '20:55:00', 2, 2026, 20, 14, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(6, 'Jueves', '18:00:00', '22:15:00', 2, 2026, 5, 5, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(7, 'Viernes', '18:00:00', '20:00:00', 2, 2026, 19, 12, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(8, 'Lunes', '18:00:00', '20:00:00', 2, 2026, 27, 8, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(9, 'Lunes', '20:15:00', '22:15:00', 2, 2026, 26, 9, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(10, 'Martes', '18:00:00', '21:35:00', 2, 2026, 40, 11, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(11, 'Miércoles', '18:00:00', '20:55:00', 2, 2026, 11, 4, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(12, 'Jueves', '18:00:00', '20:55:00', 2, 2026, 25, 1, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(13, 'Viernes', '18:00:00', '22:15:00', 2, 2026, 12, 5, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(14, 'Lunes', '18:00:00', '22:15:00', 2, 2026, 35, 5, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(15, 'Martes', '18:00:00', '20:00:00', 2, 2026, 34, 15, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(16, 'Martes', '20:15:00', '22:15:00', 2, 2026, 36, NULL, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(17, 'Miércoles', '18:00:00', '20:55:00', 2, 2026, 38, 13, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(18, 'Miércoles', '20:55:00', '22:15:00', 2, 2026, 37, NULL, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(19, 'Jueves', '18:00:00', '21:35:00', 2, 2026, 33, 14, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(20, 'Viernes', '18:00:00', '22:15:00', 2, 2026, 39, 6, '2026-11-02 21:38:31', '2026-11-02 21:38:31'),
+	(21, 'Lunes', '18:00:00', '20:00:00', 1, 2026, 2, 1, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(22, 'Lunes', '20:15:00', '22:15:00', 1, 2026, 3, 3, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(23, 'Martes', '18:00:00', '20:00:00', 1, 2026, 18, NULL, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(24, 'Martes', '20:15:00', '22:15:00', 1, 2026, 4, 5, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(25, 'Miércoles', '18:00:00', '20:55:00', 1, 2026, 17, 10, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(26, 'Jueves', '18:00:00', '22:15:00', 1, 2026, 4, 5, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(27, 'Viernes', '18:00:00', '20:00:00', 1, 2026, 1, 12, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(28, 'Lunes', '18:00:00', '20:00:00', 1, 2026, 24, 7, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(29, 'Lunes', '20:15:00', '22:15:00', 1, 2026, 23, 9, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(30, 'Martes', '18:00:00', '21:35:00', 1, 2026, 21, 11, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(31, 'Miércoles', '18:00:00', '20:55:00', 1, 2026, 11, 4, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(32, 'Jueves', '18:00:00', '20:55:00', 1, 2026, 22, 6, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(33, 'Viernes', '18:00:00', '22:15:00', 1, 2026, 9, 5, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(34, 'Lunes', '18:00:00', '22:15:00', 1, 2026, 13, 5, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(35, 'Martes', '18:00:00', '20:00:00', 1, 2026, 28, 15, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(36, 'Martes', '20:15:00', '22:45:00', 1, 2026, 29, NULL, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(37, 'Miércoles', '18:00:00', '20:55:00', 1, 2026, 31, 11, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(38, 'Miércoles', '20:55:00', '22:45:00', 1, 2026, 32, 4, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(39, 'Jueves', '18:00:00', '21:35:00', 1, 2026, 16, 14, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(40, 'Viernes', '18:00:00', '20:00:00', 1, 2026, 15, 6, '2026-11-02 21:41:25', '2026-11-02 21:41:25'),
+	(41, 'Viernes', '20:15:00', '22:45:00', 1, 2026, 30, 16, '2026-11-02 21:41:25', '2026-11-02 21:41:25');
+
+-- Volcando datos para la tabla sistema_academico.materias: ~39 rows (aproximadamente)
+INSERT INTO `materias` (`id`, `nombre`, `anio_carrera`, `cuatrimestre`, `es_anual`, `es_promocional`, `created_at`, `updated_at`) VALUES
+	(1, 'Introducción a la gastronomía', '1', 1, 0, 1, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(2, 'Seguridad e higiene en la gastronomía', '1', NULL, 1, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(3, 'Taller de primeros auxilios', '1', 1, 0, 1, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(4, 'Elaboraciones a base de vegetales, cereales y huevos', '1', 1, 0, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(5, 'Elaboraciones a base de carnes', '1', 2, 0, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(6, 'Principios de economía', '1', 2, 0, 1, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(7, 'Elementos de química', '1', 2, 0, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(8, 'Panadería básica', '2', 2, 0, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(9, 'Elaboración de pizzas y pastas', '2', 1, 0, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(11, 'Elementos de administración y contabilidad', '2', NULL, 1, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(12, 'Práctica Profesional II: Organización de la producción', '2', 2, 0, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(13, 'Elaboraciones de buffet', '3', 1, 0, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(14, 'Cocina nacional e internacional', '3', 1, 0, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(15, 'Compras y gestión de stock', '3', 1, 0, 1, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(16, 'Organización de eventos gastronómicos', '3', 1, 0, 0, '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(17, 'Nutrición', '1', 1, 0, 0, '2026-11-02 20:38:16', '2026-11-02 20:38:16'),
+	(18, 'Taller de comunicación escrita', '1', 1, 0, 0, '2026-11-02 20:42:14', '2026-11-02 20:42:14'),
+	(19, 'Industria de la hospitalidad', '1', 2, 0, 0, '2026-11-02 20:43:35', '2026-11-02 20:43:35'),
+	(20, 'Práctica Profesional N°1: observación organizacional', '1', 2, 0, 0, '2026-11-02 20:44:19', '2026-11-02 20:44:19'),
+	(21, 'Elaboraciones de panadería (aula taller)', '2', 1, 0, 0, '2026-11-02 20:44:46', '2026-11-02 20:44:46'),
+	(22, 'Introducción general a la microempresa', '2', 1, 0, 0, '2026-11-02 20:44:55', '2026-11-02 20:44:55'),
+	(23, 'Inglés', '2', 1, 0, 0, '2026-11-02 20:45:03', '2026-11-02 20:45:03'),
+	(24, 'Taller de informática', '2', 1, 0, 0, '2026-11-02 20:45:17', '2026-11-02 20:45:17'),
+	(25, 'Comercialización', '2', 2, 0, 0, '2026-11-02 20:45:28', '2026-11-02 20:45:28'),
+	(26, 'Inglés técnico', '2', 2, 0, 0, '2026-11-02 20:45:37', '2026-11-02 20:45:37'),
+	(27, 'Herramientas de investigación', '2', 2, 0, 0, '2026-11-02 20:45:45', '2026-11-02 20:45:45'),
+	(28, 'Seminario de actualización/profundización I', '3', 1, 0, 0, '2026-11-02 20:46:09', '2026-11-02 20:46:09'),
+	(29, 'Recursos Humanos', '3', 1, 0, 0, '2026-11-02 20:46:20', '2026-11-02 20:46:20'),
+	(30, 'Taller de francés técnico', '3', 1, 0, 0, '2026-11-02 20:46:28', '2026-11-02 20:46:28'),
+	(31, 'Repostería (aula taller)', '3', 1, 0, 0, '2026-11-02 20:47:18', '2026-11-02 20:47:18'),
+	(32, 'Organización empresarial', '3', 1, 0, 0, '2026-11-02 20:47:25', '2026-11-02 20:47:25'),
+	(33, 'Servicios de catering (aula taller)', '3', 2, 0, 0, '2026-11-02 20:47:40', '2026-11-02 20:47:40'),
+	(34, 'Seminario de actualización/profundización II', '3', 2, 0, 0, '2026-11-02 20:47:46', '2026-11-02 20:47:46'),
+	(35, 'Cocina nacional e internacional (aula taller)', '3', 2, 0, 0, '2026-11-02 20:47:52', '2026-11-02 20:47:52'),
+	(36, 'Taller de conducción de equipos', '3', 2, 0, 0, '2026-11-02 20:47:57', '2026-11-02 20:47:57'),
+	(37, 'Bebidas', '3', 2, 0, 0, '2026-11-02 20:48:01', '2026-11-02 20:48:01'),
+	(38, 'Laboratorio de tecnología de los alimentos', '3', 2, 0, 0, '2026-11-02 20:48:08', '2026-11-02 20:48:08'),
+	(39, 'Práctica profesional N°3: diseño de emprendimientos  gastronómicos', '3', 2, 0, 0, '2026-11-02 20:48:18', '2026-11-02 20:48:18'),
+	(40, 'Pastelería básica (aula taller)', '2', 2, 0, 0, '2026-11-02 21:02:45', '2026-11-02 21:02:45');
+
+-- Volcando datos para la tabla sistema_academico.mesas_examenes: ~38 rows (aproximadamente)
+INSERT INTO `mesas_examenes` (`id`, `materia_id`, `periodo`, `fecha`, `hora`, `anio_vigencia`, `created_at`, `updated_at`) VALUES
+	(1, 2, 'Diciembre 2026', '2026-12-07', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(2, 3, 'Diciembre 2026', '2026-12-07', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(3, 24, 'Diciembre 2026', '2026-12-07', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(4, 23, 'Diciembre 2026', '2026-12-07', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(5, 33, 'Diciembre 2026', '2026-12-07', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(6, 18, 'Diciembre 2026', '2026-12-08', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(7, 12, 'Diciembre 2026', '2026-12-08', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(8, 13, 'Diciembre 2026', '2026-12-08', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(9, 28, 'Diciembre 2026', '2026-12-08', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(10, 36, 'Diciembre 2026', '2026-12-08', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(11, 30, 'Diciembre 2026', '2026-12-08', '19:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(12, 17, 'Diciembre 2026', '2026-12-09', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(13, 40, 'Diciembre 2026', '2026-12-09', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(14, 31, 'Diciembre 2026', '2026-12-09', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(15, 21, 'Diciembre 2026', '2026-12-09', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(16, 4, 'Diciembre 2026', '2026-12-10', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(17, 35, 'Diciembre 2026', '2026-12-10', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(18, 16, 'Diciembre 2026', '2026-12-10', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(19, 1, 'Diciembre 2026', '2026-12-11', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(20, 5, 'Diciembre 2026', '2026-12-11', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(21, 15, 'Diciembre 2026', '2026-12-11', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(22, 29, 'Diciembre 2026', '2026-12-11', '19:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(23, 19, 'Diciembre 2026', '2026-12-14', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(24, 27, 'Diciembre 2026', '2026-12-14', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(25, 26, 'Diciembre 2026', '2026-12-14', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(26, 37, 'Diciembre 2026', '2026-12-14', '19:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(27, 7, 'Diciembre 2026', '2026-12-15', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(28, 9, 'Diciembre 2026', '2026-12-15', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(29, 34, 'Diciembre 2026', '2026-12-15', '19:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(30, 6, 'Diciembre 2026', '2026-12-16', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(31, 8, 'Diciembre 2026', '2026-12-16', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(32, 38, 'Diciembre 2026', '2026-12-16', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(33, 20, 'Diciembre 2026', '2026-12-17', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(34, 25, 'Diciembre 2026', '2026-12-17', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(35, 22, 'Diciembre 2026', '2026-12-17', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(36, 39, 'Diciembre 2026', '2026-12-17', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(37, 11, 'Diciembre 2026', '2026-12-18', '18:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32'),
+	(38, 32, 'Diciembre 2026', '2026-12-18', '19:00:00', 2026, '2026-11-02 21:50:32', '2026-11-02 21:50:32');
+
+-- Volcando datos para la tabla sistema_academico.mesa_examen_profesor: ~81 rows (aproximadamente)
+INSERT INTO `mesa_examen_profesor` (`mesa_examen_id`, `profesor_id`) VALUES
+	(1, 1),
+	(1, 12),
+	(1, 17),
+	(2, 3),
+	(2, 12),
+	(2, 17),
+	(3, 7),
+	(3, 12),
+	(3, 17),
+	(4, 9),
+	(4, 12),
+	(4, 17),
+	(5, 14),
+	(5, 17),
+	(6, 13),
+	(6, 17),
+	(7, 5),
+	(7, 13),
+	(8, 5),
+	(8, 13),
+	(9, 13),
+	(9, 15),
+	(10, 13),
+	(10, 14),
+	(11, 13),
+	(11, 16),
+	(12, 10),
+	(12, 13),
+	(13, 11),
+	(13, 17),
+	(14, 11),
+	(14, 17),
+	(15, 11),
+	(15, 17),
+	(16, 5),
+	(16, 13),
+	(17, 5),
+	(17, 13),
+	(18, 13),
+	(18, 14),
+	(19, 12),
+	(19, 13),
+	(20, 5),
+	(20, 17),
+	(21, 6),
+	(21, 17),
+	(22, 4),
+	(22, 17),
+	(23, 12),
+	(23, 13),
+	(23, 17),
+	(24, 8),
+	(24, 17),
+	(25, 9),
+	(25, 17),
+	(26, 14),
+	(26, 17),
+	(27, 2),
+	(27, 12),
+	(28, 5),
+	(28, 12),
+	(29, 12),
+	(29, 15),
+	(30, 1),
+	(30, 13),
+	(31, 11),
+	(31, 13),
+	(32, 2),
+	(32, 13),
+	(33, 14),
+	(33, 17),
+	(34, 1),
+	(34, 6),
+	(35, 6),
+	(35, 13),
+	(36, 6),
+	(36, 17),
+	(37, 4),
+	(37, 6),
+	(38, 4),
+	(38, 6);
+
+-- Volcando datos para la tabla sistema_academico.multimedia_galeria: ~0 rows (aproximadamente)
+
+-- Volcando datos para la tabla sistema_academico.novedades: ~3 rows (aproximadamente)
+INSERT INTO `novedades` (`id`, `titulo`, `descripcion_breve`, `etiqueta`, `imagen_portada_url`, `fecha_publicacion`, `estado`, `usuario_id`, `created_at`, `updated_at`) VALUES
+	(1, 'Día del cocinero y de la cocinera', ' Desde el primer fuego hasta hoy, el corazón de la cocina sigue siendo el mismo: manos que crean, pasión que transforma.\nEn este Día del Cocinero y la Cocinera 👩‍🍳👨‍🍳 celebramos a quienes hacen de cada receta un acto de amor, de cada ingrediente una historia y de cada plato una experiencia.\nGracias a nuestros estudiantes, docentes y egresados por cocinar con dedicación todos los días.\n¡Feliz día!', 'Eventos', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSk4x6Qsy20iw-kGYz4YI9Cz6pSpWkjHs3yFiL7QrGV_g&s=10', '2026-10-20', 'Publicado', 3, '2026-10-19 20:20:08', '2026-10-19 20:20:08'),
+	(4, 'Día del gastronómico y hotelero', 'Desde el IFTS Nº2 saludamos a todos los trabajadores del sector, y renovamos nuestro compromiso con la formación de profesionales que honren estas nobles profesiones con excelencia, responsabilidad y pasión.\n¡Feliz Día del Trabajador Gastronómico y Hotelero! 💙💚\n#DíaDelTrabajadorGastronómicoYHotelero #IFTS2 #Gastronomía #Hotelería #Educación', 'Novedades', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLxDkdCZ1PLZzWMbC1basQ-j5ZmWveDgMoPOyI3O7-JA&s=10', '2026-08-01', 'Publicado', 3, '2026-08-01 20:24:19', '2026-08-01 20:30:50'),
+	(5, 'Noche de los museos barrial - Parrilla al aire libre', 'Un año más el IFTS N°2 participara en la Noche de los Museos Barrial.\n\nDesde 2018, nuestra misión sigue intacta: pasión, técnica y profesión en la cocina. ✨🍳\n\n​Lo que comenzó como una idea hace unos años, hoy es una realidad que nos llena de orgullo: mostrar el verdadero nivel y el detrás de escena de las prácticas profesionales gastronómicas en el IFTS N°2.\n\n​En cada plato no solo hay técnicas de alta cocina, sino también:\n\n🧑‍🍳 Talento y dedicación en la elaboración de especialidades por parte de nuestros estudiantes.\n📈 Evolución constante en cada etapa de su aprendizaje.\n🎓 Excelencia técnica y el nivel de expertise profesional con el que nuestros egresados salen al mundo laboral.\n\n​Gracias por acompañarnos a construir el futuro de la gastronomía. 🍷✨ @juntaluganoriachuelo', 'Novedades', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS28StJ-_gAEZbevl_OlMMDoADyjq5OCLlNAhROlMSi9A&s=10', '2026-11-02', 'Publicado', 3, '2026-11-02 20:28:58', '2026-11-02 20:30:52');
+
+-- Volcando datos para la tabla sistema_academico.profesores: ~17 rows (aproximadamente)
+INSERT INTO `profesores` (`id`, `nombre_completo`, `created_at`, `updated_at`) VALUES
+	(1, 'Prof. Miguel Colloca', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(2, 'Prof. Daniel Buczel', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(3, 'Prof. Evangelina Calderón', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(4, 'Prof. Emanuel Accardi', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(5, 'Prof. Francisco Giménez', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(6, 'Prof. Diego Pulitta', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(7, 'Prof. Carlos Marcelo Alderisio', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(8, 'Prof. Mercedes Biagioni', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(9, 'Prof. Grisel de Landeta', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(10, 'Prof. Evangelina Aguilar Corcuera', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(11, 'Prof. Iris Leyte', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(12, 'Prof. Camila Sabalsagaray Montera', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(13, 'Prof. Julia Sboro', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(14, 'Prof. Axel Trebino', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(15, 'Prof. Walter Albarracin', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(16, 'Prof. Viviana Ferraro', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
+	(17, 'Prof. Gladis Casalegno', '2026-11-02 20:03:42', '2026-11-02 20:03:42');
+
+-- Volcando datos para la tabla sistema_academico.profesor_materia: ~31 rows (aproximadamente)
+INSERT INTO `profesor_materia` (`profesor_id`, `materia_id`, `rol`) VALUES
+	(1, 2, 'titular'),
+	(1, 6, 'titular'),
+	(1, 25, 'titular'),
+	(2, 7, 'titular'),
+	(3, 3, 'titular'),
+	(4, 11, 'titular'),
+	(4, 32, 'titular'),
+	(5, 4, 'titular'),
+	(5, 5, 'titular'),
+	(5, 9, 'titular'),
+	(5, 12, 'titular'),
+	(5, 13, 'titular'),
+	(5, 35, 'titular'),
+	(6, 15, 'titular'),
+	(6, 22, 'titular'),
+	(6, 39, 'titular'),
+	(7, 24, 'titular'),
+	(8, 27, 'titular'),
+	(9, 23, 'titular'),
+	(9, 26, 'titular'),
+	(10, 17, 'titular'),
+	(11, 21, 'titular'),
+	(11, 31, 'titular'),
+	(11, 40, 'titular'),
+	(12, 1, 'titular'),
+	(12, 19, 'titular'),
+	(13, 38, 'titular'),
+	(14, 16, 'titular'),
+	(15, 28, 'titular'),
+	(15, 34, 'titular'),
+	(16, 30, 'titular');
+
+-- Volcando datos para la tabla sistema_academico.tramites_requisitos: ~6 rows (aproximadamente)
+INSERT INTO `tramites_requisitos` (`id`, `nombre_tramite`, `descripcion_requisitos`, `created_at`, `updated_at`) VALUES
+	(1, 'Certificado de alumno regular', 'Completar el formulario en Bedelía. Presentar DNI. El certificado se entrega dentro de las 48 hs hábiles.', '2026-11-02 21:22:49', '2026-11-02 21:22:49'),
+	(2, 'Analítico parcial', 'Solicitar en Bedelía con al menos 5 días hábiles de anticipación. Presentar DNI y constancia de materias cursadas.', '2026-11-02 21:22:49', '2026-11-02 21:22:49'),
+	(3, 'Boleto Estudiantil (SUBE)', 'Completar el formulario online en la web de SUBE. Presentar en Bedelía: DNI, constancia de alumno regular y 1 foto carné.', '2026-11-02 21:22:49', '2026-11-02 21:22:49'),
+	(4, 'Certificado de asistencia a examen', 'Solicitarlo en Bedelía el mismo día del examen o hasta 2 días hábiles después. Presentar DNI.', '2026-11-02 21:22:49', '2026-11-02 21:22:49'),
+	(5, 'Libre deuda', 'Solicitar en Secretaría Administrativa. Plazo de entrega: 5 días hábiles. Requisito previo: no tener material ni equipamiento a cargo.', '2026-11-02 21:22:49', '2026-11-02 21:22:49'),
+	(6, 'Equivalencias de materias', 'Presentar nota de solicitud dirigida a Rectoría, programa analítico de la/s materia/s a homologar y certificado de estudios previos.', '2026-11-02 21:22:49', '2026-11-02 21:22:49');
+
+-- Volcando datos para la tabla sistema_academico.usuarios
 INSERT INTO usuarios (id, nombre_completo, rol_institucional, nivel_de_acceso, correo, password_hash) VALUES
 (1, 'Prof. Alicia E. Ruidiaz', 'Rectora', 'Administrador General', 'aruidiaz@ifts2.edu.ar', '$2b$10$9cDpixTLfiIf19WfwPIZh.HwQT06qJMVIP5SFRU1/CAtgr4SyJh0C'),
 (2, 'María del Carmen Canovi', 'Secretaria Académica', 'Gestión Académica', 'mcanovi@ifts2.edu.ar', '$2b$10$9cDpixTLfiIf19WfwPIZh.HwQT06qJMVIP5SFRU1/CAtgr4SyJh0C')
 ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash);
-
--- 2. Insertar Autoridades
-INSERT INTO autoridades (cargo, nombre_responsable) VALUES
-('RECTORA', 'Prof. Alicia E. Ruidiaz'),
-('SECRETARIO ACADÉMICO', 'Lic. Leonardo Bermudez'),
-('SECRETARIA ADMINISTRATIVA', 'Prof. María Belén Orellano Camu'),
-('JEFATURA DE TRABAJOS PRÁCTICOS', 'Prof. Pedro Perez'),
-('TUTOR', 'Prof. Axel Trebino');
-
--- 3. Insertar Profesores
-INSERT INTO profesores (id, nombre_completo) VALUES
-(1, 'Prof. Miguel Colloca'),
-(2, 'Prof. Gladis Casalegno');
-
--- 4. Insertar Plan de Materias
-INSERT INTO materias (id, nombre, anio_carrera, cuatrimestre, es_anual, es_promocional) VALUES
-(1, 'Seguridad e higiene en la gastronomía', '1', NULL, TRUE, FALSE),
-(2, 'Elaboración a base de vegetales, cereales y huevos', '1', 1, FALSE, FALSE),
-(3, 'Nutrición', '1', 1, FALSE, FALSE),
-(4, 'Introducción a la gastronomía', '1', 1, FALSE, TRUE),
-(5, 'Taller de primeros Auxilios', '1', 1, FALSE, TRUE),
-(6, 'Taller de comunicación escrita', '1', 1, FALSE, TRUE),
-(7, 'Elaboración a base de carnes', '1', 2, FALSE, FALSE),
-(8, 'Elementos de química', '1', 2, FALSE, FALSE),
-(9, 'Principios de economía', '1', 2, FALSE, TRUE),
-(10, 'Industria de la hospitalidad', '1', 2, FALSE, TRUE),
-(11, 'Práctica Profesional N°1: observación organizacional', '1', 2, FALSE, FALSE),
-(12, 'Elaboración de pizzas y pastas', '2', 1, FALSE, FALSE),
-(13, 'Elaboraciones de panadería', '2', 1, FALSE, FALSE),
-(14, 'Introducción general a la microempresa', '2', 1, FALSE, FALSE),
-(15, 'Inglés', '2', 1, FALSE, TRUE),
-(16, 'Taller de informática', '2', 1, FALSE, TRUE),
-(17, 'Pastelería básica', '2', 2, FALSE, FALSE),
-(18, 'Comercialización', '2', 2, FALSE, TRUE),
-(19, 'Inglés técnico', '2', 2, FALSE, TRUE),
-(20, 'Herramientas de investigación', '2', 2, FALSE, FALSE),
-(21, 'Práctica profesional N°2: organización de la producción', '2', 2, FALSE, FALSE),
-(22, 'Elementos de administración y contabilidad', '2', NULL, TRUE, FALSE),
-(23, 'Elaboración de buffet', '3', 1, FALSE, FALSE),
-(24, 'Seminario de actualización/profundización I', '3', 1, FALSE, TRUE),
-(25, 'Organización de eventos gastronómicos', '3', 1, FALSE, FALSE),
-(26, 'Compras y gestión de stock', '3', 1, FALSE, TRUE),
-(27, 'Recursos Humanos', '3', 1, FALSE, FALSE),
-(28, 'Taller de francés técnico', '3', 1, FALSE, FALSE),
-(29, 'Repostería', '3', 1, FALSE, FALSE),
-(30, 'Organización empresarial', '3', 1, FALSE, TRUE),
-(31, 'Servicios de catering', '3', 2, FALSE, FALSE),
-(32, 'Seminario de actualización/profundización II', '3', 2, FALSE, TRUE),
-(33, 'Cocina nacional e internacional', '3', 2, FALSE, FALSE),
-(34, 'Taller de conducción de equipos', '3', 2, FALSE, FALSE),
-(35, 'Bebidas', '3', 2, FALSE, TRUE),
-(36, 'Laboratorio de tecnología de los alimentos', '3', 2, FALSE, FALSE),
-(37, 'Práctica profesional N°3: diseño de emprendimientos gastronómicos', '3', 2, FALSE, FALSE);
-
--- 5. Insertar Correlatividades
-INSERT INTO correlatividades (materia_id, materia_requisito_id, tipo_requisito) VALUES
-(2, 4, 'CURSADA'), (2, 1, 'CURSADA'), (2, 5, 'CURSADA'),
-(7, 2, 'APROBADA'),
-(12, 13, 'CURSADA'),
-(29, 17, 'CURSADA'),
-(36, 8, 'CURSADA'),
-(23, 2, 'APROBADA'), (23, 7, 'APROBADA'),
-(18, 14, 'CURSADA'), (18, 9, 'APROBADA'),
-(33, 2, 'CURSADA'), (33, 7, 'CURSADA'),
-(26, 22, 'CURSADA'),
-(25, 26, 'CURSADA'), (25, 31, 'CURSADA'),
-(11, 6, 'CURSADA'), (11, 4, 'CURSADA'),
-(21, 23, 'CURSADA'), (21, 22, 'CURSADA'), (21, 11, 'APROBADA'), (21, 2, 'APROBADA'), (21, 7, 'APROBADA'),
-(37, 26, 'CURSADA'), (37, 18, 'APROBADA'), (37, 20, 'APROBADA'), (37, 11, 'APROBADA'), (37, 21, 'APROBADA');
-
--- 6. Insertar Novedades
-INSERT INTO novedades (id, titulo, descripcion_breve, etiqueta, imagen_portada_url, fecha_publicacion, estado, usuario_id) VALUES
-(1, 'Inscripciones abiertas para el ciclo lectivo 2027', 'El período de preinscripción ya está disponible.', 'Novedades', 'https://images.unsplash.com/photo-1577219492769-b63a779fac28?w=80&h=60&fit=crop&auto=format', CURDATE(), 'Publicado', 1),
-(2, 'Feria gastronómica', 'Invitación a la comunidad a la nueva feria gastronómica', 'Eventos', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOqEEyhNbVfVYi_6JCNTHh6lYSkUeR8WRdKNq3HGEUXrNKaKGczeiLLAdi&s=10', '2026-12-01', 'Borrador', 1),
-(3, 'Colación de grado', 'Nueva colación de grado Diciembre', 'Eventos', 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcgnsJ2TZMTHpXldRyFISI9sIa_9neiKna4OnF6pNicw&s=10', CURDATE(), 'Borrador', 1);
-
--- 7. Relacionar Profesor-Materia
-INSERT INTO profesor_materia (profesor_id, materia_id, rol) VALUES 
-(1, 1, 'titular'),
-(2, 1, 'ayudante');
-
--- 8. Insertar Mesas de Exámenes y relación con Profesor
-INSERT INTO mesas_examenes (id, materia_id, periodo, fecha, hora, anio_vigencia) VALUES
-(1, 1, 'Marzo 2027', '2027-03-03', '18:00:00', 2027),
-(2, 1, 'Marzo 2027', '2027-03-17', '18:00:00', 2027);
-
-INSERT INTO mesa_examen_profesor (mesa_examen_id, profesor_id) VALUES
-(1, 1), (2, 1);
-
--- 9. Insertar Horarios de Cursada
-INSERT INTO horarios_cursada (dia_semana, hora_inicio, hora_fin, cuatrimestre, anio, materia_id, profesor_id) VALUES
-('Lunes', '18:00:00', '20:00:00', 1, 2027, 1, 1);
-
--- 10. Insertar Bedeles
-INSERT INTO bedeles (nombre, anio_asignado) VALUES 
-('Sra. Andrea Barrios', 'Primer Año'),
-('Sra. Verónica Alarcón', 'Segundo Año'),
-('Sr. Esteban Suárez', 'Tercer Año');
-
--- 11. Trámites, Requisitos y Enlaces
-INSERT INTO tramites_requisitos (nombre_tramite, descripcion_requisitos) VALUES
-('Certificado de alumno regular', 'Completar el formulario en Bedelía. Presentar DNI. El certificado se entrega dentro de las 48 hs hábiles.'),
-('Analítico parcial', 'Solicitar en Bedelía con al menos 5 días hábiles de anticipación. Presentar DNI y constancia de materias cursadas.'),
-('Boleto Estudiantil (SUBE)', 'Completar el formulario online en la web de SUBE. Presentar en Bedelía: DNI, constancia de alumno regular y 1 foto carné.'),
-('Certificado de asistencia a examen', 'Solicitarlo en Bedelía el mismo día del examen o hasta 2 días hábiles después. Presentar DNI.'),
-('Libre deuda', 'Solicitar en Secretaría Administrativa. Plazo de entrega: 5 días hábiles. Requisito previo: no tener material ni equipamiento a cargo.'),
-('Equivalencias de materias', 'Presentar nota de solicitud dirigida a Rectoría, programa analítico de la/s materia/s a homologar y certificado de estudios previos.');
-
-INSERT INTO enlaces_externos (nombre_sistema, url_destino) VALUES
-('SIU Guaraní', 'https://guarani.ifts2.edu.ar'),
-('Moodle / Aulas Virtuales', 'https://aulasvirtuales.bue.edu.ar/'),
-('Becas PROGRESAR', 'https://www.argentina.gob.ar/educacion/progresar'),
-('Mi Argentina', 'https://www.miargentina.gob.ar');
-
--- 12. Configuración Institucional
-INSERT INTO configuracion_institucional (clave, valor_texto) VALUES 
-('carrera.correlatividades.nota', 'Criterio simplificado: Cursada agrupa cursada aprobada y requisitos en curso; Aprobada exige la materia aprobada. La resolución contempla además hasta un 25% en curso simultáneo para Práctica Profesional N°3. Esa condición se conserva como referencia, sin evaluación automática.');
-
--- 13. Insertar Etapas de Ingreso
-INSERT INTO etapas_ingreso (anio, nombre, descripcion, orden, activo) VALUES
-(2027, 'Período de pre-inscripción y carga de documentación', 'Los aspirantes a la carrera completan el formulario de pre-inscripción en línea y adjuntan la documentación requerida.', 1, TRUE),
-(2027, 'Curso de preingreso', 'Jornadas de introducción a la carrera, metodología de estudio y presentación institucional.', 2, TRUE);
