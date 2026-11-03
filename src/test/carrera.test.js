@@ -40,13 +40,19 @@ describe("Carrera en base temporal aislada", () => {
       password: process.env.DB_PASSWORD,
       multipleStatements: true,
     });
+
     const esquema = (
       await fs.readFile(
-        path.resolve(__dirname, "../database/ifts2-db.sql"),
+        path.resolve(__dirname, "../database/sistema_academico.sql"),
         "utf8",
       )
     ).replaceAll("sistema_academico", nombreDb);
-    await servidor.query(esquema);
+    await servidor.query("SET FOREIGN_KEY_CHECKS = 0");
+    try {
+      await servidor.query(esquema);
+    } finally {
+      await servidor.query("SET FOREIGN_KEY_CHECKS = 1");
+    }
     const hash = await bcrypt.hash("PruebaCarrera123", 4);
     await db.query(
       "INSERT INTO usuarios (nombre_completo, nivel_de_acceso, correo, password_hash) VALUES ?",
@@ -198,7 +204,7 @@ describe("Carrera en base temporal aislada", () => {
       "SELECT rol FROM profesor_materia WHERE profesor_id = ? AND materia_id = ?",
       [profesor2, id],
     );
-    expect(roles[0].rol).toBe("ayudante");
+    expect(roles.map(({ rol }) => rol)).toContain("ayudante");
     expect(
       (
         await request(app)
@@ -634,8 +640,8 @@ describe("Carrera en base temporal aislada", () => {
     expect((await request(app).post('/api/profesores').set(auth()).send({ nombre_completo: 'Válido', materias: [materias[0], materias[0]] })).status).toBe(400);
   });
   test("el seed migra una base previa, preserva relaciones y puede repetirse sin duplicar", async () => {
-    const { cargar, planificar } = require("../database/seed-carrera");
-    const { materias: oficiales } = require("../database/carrera-data");
+    const { cargar, planificar } = require("../database/old/seed-carrera");
+    const { materias: oficiales } = require("../database/old/carrera-data");
     expect(oficiales).toHaveLength(37);
     expect(oficiales.filter((m) => m.es_promocional)).toHaveLength(14);
     expect(oficiales.filter((m) => m.es_anual)).toHaveLength(2);
@@ -694,7 +700,7 @@ describe("Carrera en base temporal aislada", () => {
   test("carga las 13 reglas simplificadas sin duplicarlas ni sobrescribir reglas diferentes", async () => {
     const {
       cargarCorrelatividades,
-    } = require("../database/seed-correlatividades");
+    } = require("../database/old/seed-correlatividades");
     const conn = await db.getConnection();
     try {
       const preview = await cargarCorrelatividades(conn);

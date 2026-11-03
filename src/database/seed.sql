@@ -1,3 +1,5 @@
+USE `sistema_academico`;
+SET FOREIGN_KEY_CHECKS = 0;
 -- Volcando datos para la tabla sistema_academico.autoridades: ~5 rows (aproximadamente)
 INSERT INTO `autoridades` (`id`, `cargo`, `nombre_responsable`, `created_at`, `updated_at`) VALUES
 	(1, 'Rectora', 'Prof. Alicia E. Ruidiaz', '2026-11-02 20:03:42', '2026-11-02 20:03:42'),
@@ -354,3 +356,4 @@ INSERT INTO usuarios (id, nombre_completo, rol_institucional, nivel_de_acceso, c
 (1, 'Prof. Alicia E. Ruidiaz', 'Rectora', 'Administrador General', 'aruidiaz@ifts2.edu.ar', '$2b$10$9cDpixTLfiIf19WfwPIZh.HwQT06qJMVIP5SFRU1/CAtgr4SyJh0C'),
 (2, 'María del Carmen Canovi', 'Secretaria Académica', 'Gestión Académica', 'mcanovi@ifts2.edu.ar', '$2b$10$9cDpixTLfiIf19WfwPIZh.HwQT06qJMVIP5SFRU1/CAtgr4SyJh0C')
 ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash);
+SET FOREIGN_KEY_CHECKS = 1;

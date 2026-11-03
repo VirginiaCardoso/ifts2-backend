@@ -1,4 +1,4 @@
-
+SET FOREIGN_KEY_CHECKS = 0;
 -- Volcando estructura de base de datos para sistema_academico
 CREATE DATABASE IF NOT EXISTS `sistema_academico` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
 USE `sistema_academico`;
@@ -244,3 +244,4 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `correo` (`correo`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+SET FOREIGN_KEY_CHECKS = 1;
