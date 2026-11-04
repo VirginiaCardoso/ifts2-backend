@@ -54,6 +54,11 @@ const actualizarUsuario = async (req, res) => {
     if (!idValido(id)) return res.status(400).json({ error: 'ID de usuario inválido.' });
     const validacion = validarUsuario(req.body);
     if (validacion) return res.status(400).json({ error: validacion });
+    if (req.usuario.id === Number(id) &&
+    req.body.nivel_de_acceso !== undefined &&
+    req.body.nivel_de_acceso !== req.usuario.nivel_de_acceso) {
+    return res.status(400).json({ error: 'No podés cambiar tu propio nivel de acceso.' });
+}
     try {
         const [usuarios] = await poolConection.query('SELECT id FROM usuarios WHERE id = ?', [id]);
         if (!usuarios.length) return res.status(404).json({ error: 'Usuario no encontrado.' });
