@@ -84,9 +84,14 @@ const validarEtapa = (datos) => {
     fecha_fin !== null && fecha_fin !== '';
 
   if (
-    (fechaInicioInformada && !validarFecha(fecha_inicio)) ||
-    (fechaFinInformada && !validarFecha(fecha_fin))
-  ) {
+    !fechaInicioInformada || !fechaFinInformada) {
+      return 'Las fechas de inicio y finalización son obligatorias.';
+    }
+    
+  if (
+    !validarFecha(fecha_inicio) ||
+    !validarFecha(fecha_fin)
+  ){
     return 'Ingresá fechas válidas en formato AAAA-MM-DD.';
   }
 
@@ -289,4 +294,5 @@ module.exports = {
   crearIngresante,
   actualizarIngresante,
   eliminarIngresante,
+  validarEtapa,
 };
