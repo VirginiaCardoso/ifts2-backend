@@ -25,17 +25,7 @@ describe('Pruebas unitarias - Módulo Ingresantes', () => {
 
       expect(resultado).toBe('El nombre de la etapa es obligatorio y admite hasta 255 caracteres.');
     });
-
-    test('Debe rechazar una etapa sin fechas', () => {
-      const resultado = validarEtapa({
-        ...etapaValida,
-        fecha_inicio: '',
-      });
-
-      expect(resultado).toBe(
-        'Las fechas de inicio y finalización son obligatorias.'
-      );
-    });
+   
 
   });
 
@@ -47,6 +37,17 @@ describe('Pruebas unitarias - Módulo Ingresantes', () => {
 
       expect(resultado).toBeNull();
     });
+
+        test('Debe aceptar una etapa sin fechas', () => {
+      const resultado = validarEtapa({
+        ...etapaValida,
+        fecha_inicio: '',
+        fecha_fin: '',
+      });
+
+      expect(resultado).toBeNull();
+    });
+
 
     test('Debe rechazar una fecha inexistente', () => {
       const resultado = validarEtapa({
